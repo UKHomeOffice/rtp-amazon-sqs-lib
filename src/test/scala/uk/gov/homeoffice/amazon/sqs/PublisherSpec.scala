@@ -12,9 +12,7 @@ class PublisherSpec extends Specification {
       val subscriber = new Subscriber with SQSTestClient with SQSTestQueue
 
       subscriber.receive must beLike {
-        case Seq(m: Message) =>
-          println(m)
-          m.getBody mustEqual "Testing 1, 2, 3"
+        case Seq(m: Message) => m.getBody mustEqual "Testing 1, 2, 3"
       }
     }
   }

@@ -1,8 +1,6 @@
 package uk.gov.homeoffice.amazon.sqs
 
 import java.net.URL
-import akka.stream.ActorMaterializer
-import play.api.libs.ws.ning.NingWSClient
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.sqs.AmazonSQSClient
 import org.elasticmq.rest.sqs.SQSRestServerBuilder
@@ -17,10 +15,7 @@ trait SQSTestServer extends SQSServer with Scope with ComposableAround {
   val sqsHost = new URL(s"http://localhost:$getFreeServerPort")
 
   override def around[R: AsResult](r: => R): Result = {
-    val server = SQSRestServerBuilder
-      .withInterface(sqsHost.getHost)
-      .withPort(sqsHost.getPort)
-      .start()
+    val server = SQSRestServerBuilder.withInterface(sqsHost.getHost).withPort(sqsHost.getPort).start()
 
     try {
       server.waitUntilStarted()

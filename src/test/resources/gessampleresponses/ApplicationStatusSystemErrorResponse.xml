@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns7:GESMessage ns1:id="_5439bf36-be2a-404a-886b-82500e6d9641" xmlns:ns1="http://niem.gov/niem/structures/2.0" xmlns:ns2="http://niem.gov/niem/domains/immigration/2.1" xmlns:ns3="http://cbp.dhs.gov/GES/ges"
+                xmlns:ns4="http://niem.gov/niem/niem-core/2.0" xmlns:ns5="http://niem.gov/niem/domains/screening/2.1" xmlns:ns6="http://niem.gov/niem/appinfo/2.0" xmlns:ns7="http://cbp.dhs.gov/GES/ges-exchange"
+                xmlns:ns8="http://niem.gov/niem/appinfo/2.1">
+    <ns3:SchemaVersion>2.1</ns3:SchemaVersion>
+    <ns3:Header xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+    <ns3:Response ns1:id="_2f3eda25-66ae-4a03-851e-35ac325d18e9">
+        <ns3:Error>
+            <ns3:GESErrorCode>System Error</ns3:GESErrorCode>
+            <ns3:ExplanationText>Retrieving/Updating data in the database failed</ns3:ExplanationText>
+        </ns3:Error>
+        <ns3:PredicateSetIdentifier>Request GE Application Status</ns3:PredicateSetIdentifier>
+        <ns3:StartingResults>1</ns3:StartingResults>
+        <ns3:MaximumResults>10</ns3:MaximumResults>
+        <ns3:TotalResults>1</ns3:TotalResults>
+        <ns3:AsOfDateTime xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+        <ns3:GES ns1:id="_c4071025-56c5-4e53-a2f6-3510f8fe00d5">
+            <ns3:Request ns1:id="_2289b67e-249b-4ac2-979d-dda8c8eee59d">
+                <ns4:ActivityIdentification>
+                    <ns4:IdentificationID>11157431</ns4:IdentificationID>
+                    <ns4:IdentificationSourceText>GES</ns4:IdentificationSourceText>
+                </ns4:ActivityIdentification>
+                <ns4:ActivityIdentification>
+                    <ns4:IdentificationID>130031</ns4:IdentificationID>
+                    <ns4:IdentificationSourceText>GOES</ns4:IdentificationSourceText>
+                </ns4:ActivityIdentification>
+                <ns4:ActivityCategoryText>Initial Enrollment</ns4:ActivityCategoryText>
+                <ns4:ActivityStatus>
+                    <ns4:StatusText>Pending Risk Assessment Review</ns4:StatusText>
+                    <ns4:StatusDate>
+                        <ns4:Date>2015-03-16</ns4:Date>
+                    </ns4:StatusDate>
+                </ns4:ActivityStatus>
+                <ns3:Program>Global Entry</ns3:Program>
+                <ns3:Source>GOES</ns3:Source>
+                <ns3:Port>
+                    <ns3:PortCodeText>STA</ns3:PortCodeText>
+                </ns3:Port>
+            </ns3:Request>
+            <ns4:Person ns1:id="_a98a9355-97fe-4b14-a548-789ade7be518">
+                <ns4:PersonBirthDate>
+                    <ns4:Date>1966-11-12</ns4:Date>
+                </ns4:PersonBirthDate>
+                <ns4:PersonBirthLocation>
+                    <ns4:LocationAddress>
+                        <ns4:StructuredAddress>
+                            <ns4:LocationCityName>Rockville</ns4:LocationCityName>
+                            <ns4:LocationCountryISO3166Alpha3Code>GBR</ns4:LocationCountryISO3166Alpha3Code>
+                        </ns4:StructuredAddress>
+                    </ns4:LocationAddress>
+                </ns4:PersonBirthLocation>
+                <ns4:PersonCitizenshipISO3166Alpha3Code>GBR</ns4:PersonCitizenshipISO3166Alpha3Code>
+                <ns4:PersonEyeColorCode>BRO</ns4:PersonEyeColorCode>
+                <ns4:PersonHeightMeasure>
+                    <ns4:MeasurePointValue>1.803400</ns4:MeasurePointValue>
+                    <ns4:MeasureUnitText>M</ns4:MeasureUnitText>
+                </ns4:PersonHeightMeasure>
+                <ns4:PersonName>
+                    <ns4:PersonGivenName>TESTC</ns4:PersonGivenName>
+                    <ns4:PersonSurName>TESTUKGETC</ns4:PersonSurName>
+                </ns4:PersonName>
+                <ns4:PersonPrimaryLanguage>
+                    <ns4:LanguageName>English</ns4:LanguageName>
+                </ns4:PersonPrimaryLanguage>
+                <ns4:PersonSexCode>M</ns4:PersonSexCode>
+            </ns4:Person>
+            <ns3:PersonRequestAssociation>
+                <ns4:PersonReference ns1:ref="_a98a9355-97fe-4b14-a548-789ade7be518"/>
+                <ns3:RequestReference ns1:ref="_2289b67e-249b-4ac2-979d-dda8c8eee59d"/>
+            </ns3:PersonRequestAssociation>
+            <ns4:Identification ns1:id="_d632ef25-3c01-493d-b528-27d8f075d326">
+                <ns4:IdentificationID>779082301</ns4:IdentificationID>
+                <ns4:IdentificationCategoryText>GES</ns4:IdentificationCategoryText>
+            </ns4:Identification>
+            <ns4:Identification ns1:id="_cd0d7686-7404-4707-84d0-3061a85ffca6">
+                <ns4:IdentificationID>TESTUKGET</ns4:IdentificationID>
+                <ns4:IdentificationCategoryText>GOES</ns4:IdentificationCategoryText>
+            </ns4:Identification>
+            <ns4:Identification ns1:id="_2aba0ae9-a7ec-4486-90d7-8962b825a05d">
+                <ns4:IdentificationID>UKGETCODEA003b</ns4:IdentificationID>
+                <ns4:IdentificationCategoryText>UK GET CODE</ns4:IdentificationCategoryText>
+            </ns4:Identification>
+            <ns3:PersonIdentificationAssociation>
+                <ns4:PersonReference ns1:ref="_a98a9355-97fe-4b14-a548-789ade7be518"/>
+                <ns3:IdentificationReference ns1:ref="_d632ef25-3c01-493d-b528-27d8f075d326"/>
+            </ns3:PersonIdentificationAssociation>
+            <ns3:PersonIdentificationAssociation>
+                <ns4:PersonReference ns1:ref="_a98a9355-97fe-4b14-a548-789ade7be518"/>
+                <ns3:IdentificationReference ns1:ref="_cd0d7686-7404-4707-84d0-3061a85ffca6"/>
+            </ns3:PersonIdentificationAssociation>
+            <ns3:PersonIdentificationAssociation>
+                <ns4:PersonReference ns1:ref="_a98a9355-97fe-4b14-a548-789ade7be518"/>
+                <ns3:IdentificationReference ns1:ref="_2aba0ae9-a7ec-4486-90d7-8962b825a05d"/>
+            </ns3:PersonIdentificationAssociation>
+            <ns4:Location ns1:id="_3303442f-938a-4c95-9ed1-f9572a4db99c">
+                <ns4:LocationAddress>
+                    <ns4:StructuredAddress>
+                        <ns4:LocationCountryISO3166Alpha3Code>GBR</ns4:LocationCountryISO3166Alpha3Code>
+                    </ns4:StructuredAddress>
+                </ns4:LocationAddress>
+            </ns4:Location>
+            <ns4:ResidenceAssociation>
+                <ns4:PersonReference ns1:ref="_a98a9355-97fe-4b14-a548-789ade7be518"/>
+                <ns4:LocationReference ns1:ref="_3303442f-938a-4c95-9ed1-f9572a4db99c"/>
+            </ns4:ResidenceAssociation>
+        </ns3:GES>
+    </ns3:Response>
+</ns7:GESMessage>

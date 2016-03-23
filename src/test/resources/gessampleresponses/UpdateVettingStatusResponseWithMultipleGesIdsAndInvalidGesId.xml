@@ -1,0 +1,20 @@
+<ns8:GESMessage xmlns:ns8="http://cbp.dhs.gov/GES/ges-exchange" xmlns:ns7="http://niem.gov/niem/appinfo/2.1"
+                xmlns:ns6="http://niem.gov/niem/appinfo/2.0"
+                xmlns:ns5="http://niem.gov/niem/domains/immigration/2.1" xmlns:ns4="http://cbp.dhs.gov/GES/ges"
+                xmlns:ns3="http://niem.gov/niem/niem-core/2.0"
+                xmlns:ns2="http://niem.gov/niem/domains/screening/2.1"
+                xmlns:ns1="http://niem.gov/niem/structures/2.0" ns1:id="_11896bb5-5a87-4b5b-9da2-1c95c22d42f6">
+    <ns4:SchemaVersion>2.1</ns4:SchemaVersion>
+    <ns4:Header xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+    <ns4:Response ns1:id="_7b737e97-cf20-469c-9fbd-a9a45308599d">
+        <ns4:Error>
+            <ns4:GESErrorCode>Other</ns4:GESErrorCode>
+            <ns4:ExplanationText>java.lang.RuntimeException: Provided application ID for the enrollment program was not found</ns4:ExplanationText>
+        </ns4:Error>
+        <ns4:PredicateSetIdentifier xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+        <ns4:StartingResults>0</ns4:StartingResults>
+        <ns4:MaximumResults>0</ns4:MaximumResults>
+        <ns4:TotalResults>0</ns4:TotalResults>
+        <ns4:AsOfDateTime xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+    </ns4:Response>
+</ns8:GESMessage>

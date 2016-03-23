@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns8:GESMessage xmlns:ns8="http://cbp.dhs.gov/GES/ges-exchange" xmlns:ns7="http://niem.gov/niem/appinfo/2.1"
+                xmlns:ns6="http://niem.gov/niem/appinfo/2.0"
+                xmlns:ns5="http://niem.gov/niem/domains/immigration/2.1" xmlns:ns4="http://cbp.dhs.gov/GES/ges"
+                xmlns:ns3="http://niem.gov/niem/niem-core/2.0"
+                xmlns:ns2="http://niem.gov/niem/domains/screening/2.1"
+                xmlns:ns1="http://niem.gov/niem/structures/2.0" ns1:id="_b1bcdcf6-d1a4-4311-aecf-95cd6eee3017">
+    <ns4:SchemaVersion>2.1</ns4:SchemaVersion>
+    <ns4:Header xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+    <ns4:Response ns1:id="_cb27a3f4-ff19-457a-add3-8ad4a072c719">
+        <ns4:Error xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+        <ns4:PredicateSetIdentifier>Request Enrollment Status</ns4:PredicateSetIdentifier>
+        <ns4:StartingResults>1</ns4:StartingResults>
+        <ns4:MaximumResults>1</ns4:MaximumResults>
+        <ns4:TotalResults>1</ns4:TotalResults>
+        <ns4:AsOfDateTime xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+        <ns4:GES ns1:id="_fecf1b29-9e3b-4a31-b9c1-43b734180118">
+            <ns3:Person ns1:id="_032d02d2-704c-4010-b780-c9f8fd4c6272">
+                <ns3:PersonBirthDate>
+                    <ns3:Date>1970-07-07</ns3:Date>
+                </ns3:PersonBirthDate>
+                <ns3:PersonBirthLocation>
+                    <ns3:LocationAddress>
+                        <ns3:StructuredAddress>
+                            <ns3:LocationCityName>London</ns3:LocationCityName>
+                            <ns3:LocationCountryISO3166Alpha3Code>GBR</ns3:LocationCountryISO3166Alpha3Code>
+                        </ns3:StructuredAddress>
+                    </ns3:LocationAddress>
+                </ns3:PersonBirthLocation>
+                <ns3:PersonCitizenshipISO3166Alpha3Code>GBR</ns3:PersonCitizenshipISO3166Alpha3Code>
+                <ns3:PersonEyeColorCode>BLK</ns3:PersonEyeColorCode>
+                <ns3:PersonHeightMeasure>
+                    <ns3:MeasurePointValue>1.701800</ns3:MeasurePointValue>
+                    <ns3:MeasureUnitText>M</ns3:MeasureUnitText>
+                </ns3:PersonHeightMeasure>
+                <ns3:PersonName>
+                    <ns3:PersonGivenName>STEVE</ns3:PersonGivenName>
+                    <ns3:PersonSurName>BROWN</ns3:PersonSurName>
+                </ns3:PersonName>
+                <ns3:PersonPrimaryLanguage>
+                    <ns3:LanguageName>English</ns3:LanguageName>
+                </ns3:PersonPrimaryLanguage>
+                <ns3:PersonSexCode>M</ns3:PersonSexCode>
+            </ns3:Person>
+            <ns4:Enrollment ns1:id="_84d4fe17-88c7-4578-9579-fb39e747a48e">
+                <ns4:EnrollmentDate>
+                    <ns3:Date>2015-07-22</ns3:Date>
+                </ns4:EnrollmentDate>
+
+                <!-- Positive, it's expired -->
+
+                <ns4:EnrollmentExpirationDate>
+                    <ns3:Date>2015-07-22</ns3:Date>
+                </ns4:EnrollmentExpirationDate>
+                <ns4:EnrollmentProgram>Global Entry</ns4:EnrollmentProgram>
+                <ns4:EnrollmentStatusText>Expired</ns4:EnrollmentStatusText>
+                <ns4:GESStatusCode>NotActive</ns4:GESStatusCode>
+            </ns4:Enrollment>
+            <ns4:PersonEnrollmentAssociation>
+                <ns3:PersonReference ns1:ref="_032d02d2-704c-4010-b780-c9f8fd4c6272"/>
+                <ns4:EnrollmentReference ns1:ref="_84d4fe17-88c7-4578-9579-fb39e747a48e"/>
+            </ns4:PersonEnrollmentAssociation>
+            <ns3:Identification ns1:id="_5ae02a03-960d-4730-bee3-fc6267db58b2">
+                <ns3:IdentificationID>980209665</ns3:IdentificationID>
+                <ns3:IdentificationCategoryText>GES</ns3:IdentificationCategoryText>
+            </ns3:Identification>
+            <ns3:Identification ns1:id="_51771e40-acde-4df5-ac62-bfc6f7072615">
+                <ns3:IdentificationID>BROWN11</ns3:IdentificationID>
+                <ns3:IdentificationCategoryText>GOES</ns3:IdentificationCategoryText>
+            </ns3:Identification>
+            <ns4:PersonIdentificationAssociation>
+                <ns3:PersonReference ns1:ref="_032d02d2-704c-4010-b780-c9f8fd4c6272"/>
+                <ns4:IdentificationReference ns1:ref="_5ae02a03-960d-4730-bee3-fc6267db58b2"/>
+            </ns4:PersonIdentificationAssociation>
+            <ns4:PersonIdentificationAssociation>
+                <ns3:PersonReference ns1:ref="_032d02d2-704c-4010-b780-c9f8fd4c6272"/>
+                <ns4:IdentificationReference ns1:ref="_51771e40-acde-4df5-ac62-bfc6f7072615"/>
+            </ns4:PersonIdentificationAssociation>
+            <ns3:Location ns1:id="_6144b47e-ea33-46a0-a731-9955a5a1745f">
+                <ns3:LocationAddress>
+                    <ns3:StructuredAddress>
+                        <ns3:LocationCountryISO3166Alpha3Code>GBR</ns3:LocationCountryISO3166Alpha3Code>
+                    </ns3:StructuredAddress>
+                </ns3:LocationAddress>
+            </ns3:Location>
+            <ns3:ResidenceAssociation>
+                <ns3:PersonReference ns1:ref="_032d02d2-704c-4010-b780-c9f8fd4c6272"/>
+                <ns3:LocationReference ns1:ref="_6144b47e-ea33-46a0-a731-9955a5a1745f"/>
+            </ns3:ResidenceAssociation>
+        </ns4:GES>
+    </ns4:Response>
+</ns8:GESMessage>

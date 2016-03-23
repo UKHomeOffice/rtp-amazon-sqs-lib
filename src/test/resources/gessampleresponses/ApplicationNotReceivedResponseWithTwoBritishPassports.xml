@@ -1,0 +1,284 @@
+<ns7:GESMessage ns1:id="_32da7ffa-f185-44d7-80fc-caf5118469d3" xmlns:ns1="http://niem.gov/niem/structures/2.0" xmlns:ns2="http://niem.gov/niem/domains/immigration/2.1" xmlns:ns3="http://cbp.dhs.gov/GES/ges"
+                xmlns:ns4="http://niem.gov/niem/niem-core/2.0" xmlns:ns5="http://niem.gov/niem/domains/screening/2.1" xmlns:ns6="http://niem.gov/niem/appinfo/2.0" xmlns:ns7="http://cbp.dhs.gov/GES/ges-exchange"
+                xmlns:ns8="http://niem.gov/niem/appinfo/2.1">
+    <ns3:SchemaVersion>2.1</ns3:SchemaVersion>
+    <ns3:Header xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+    <ns3:Response ns1:id="_b36cf42e-65b2-494f-a360-ef2c9613ff19">
+        <ns3:Error xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+        <ns3:PredicateSetIdentifier>Request Application Data</ns3:PredicateSetIdentifier>
+        <ns3:StartingResults>1</ns3:StartingResults>
+        <ns3:MaximumResults>10</ns3:MaximumResults>
+        <ns3:TotalResults>2</ns3:TotalResults>
+        <ns3:AsOfDateTime xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+        <ns3:GES ns1:id="_50ce71f9-6a38-47f6-8876-4c4cfc8430dd">
+            <ns3:Request ns1:id="_9bdc9b15-be05-4458-80db-d14502f18f1c">
+                <ns4:ActivityIdentification>
+                    <ns4:IdentificationID>11157433</ns4:IdentificationID>
+                    <ns4:IdentificationSourceText>GES</ns4:IdentificationSourceText>
+                </ns4:ActivityIdentification>
+                <ns4:ActivityIdentification>
+                    <ns4:IdentificationID>130033</ns4:IdentificationID>
+                    <ns4:IdentificationSourceText>GOES</ns4:IdentificationSourceText>
+                </ns4:ActivityIdentification>
+                <ns4:ActivityCategoryText>Initial Enrollment</ns4:ActivityCategoryText>
+                <ns3:Program>Global Entry</ns3:Program>
+                <ns3:Source>GOES</ns3:Source>
+                <ns3:Port>
+                    <ns3:PortCodeText>STA</ns3:PortCodeText>
+                </ns3:Port>
+            </ns3:Request>
+            <ns4:Person ns1:id="_baa44fbb-8655-475d-a778-34cd4e18223c">
+                <ns4:PersonBirthDate>
+                    <ns4:Date>1888-11-11</ns4:Date>
+                </ns4:PersonBirthDate>
+                <ns4:PersonBirthLocation>
+                    <ns4:LocationAddress>
+                        <ns4:StructuredAddress>
+                            <ns4:LocationCityName>Rockville</ns4:LocationCityName>
+                            <ns4:LocationCountryISO3166Alpha3Code>GBR</ns4:LocationCountryISO3166Alpha3Code>
+                        </ns4:StructuredAddress>
+                    </ns4:LocationAddress>
+                </ns4:PersonBirthLocation>
+                <ns4:PersonCitizenshipISO3166Alpha3Code>GBR</ns4:PersonCitizenshipISO3166Alpha3Code>
+                <ns4:PersonEyeColorCode>BRO</ns4:PersonEyeColorCode>
+                <ns4:PersonHeightMeasure>
+                    <ns4:MeasurePointValue>1.803400</ns4:MeasurePointValue>
+                    <ns4:MeasureUnitText>M</ns4:MeasureUnitText>
+                </ns4:PersonHeightMeasure>
+                <ns4:PersonName>
+                    <ns4:PersonGivenName>TESTD</ns4:PersonGivenName>
+                    <ns4:PersonSurName>UKGETCRTEA</ns4:PersonSurName>
+                </ns4:PersonName>
+                <ns4:PersonPrimaryLanguage>
+                    <ns4:LanguageName>English</ns4:LanguageName>
+                </ns4:PersonPrimaryLanguage>
+                <ns4:PersonSexCode>M</ns4:PersonSexCode>
+            </ns4:Person>
+            <ns4:Identification ns1:id="_a69687f2-bbe8-4715-a9a3-5770da924591">
+                <ns4:IdentificationID>779082302</ns4:IdentificationID>
+                <ns4:IdentificationCategoryText>GES</ns4:IdentificationCategoryText>
+            </ns4:Identification>
+            <ns4:Identification ns1:id="_5ec7ecda-d042-4f7b-b0a8-8c4bd237d587">
+                <ns4:IdentificationID>TESTUKGET4</ns4:IdentificationID>
+                <ns4:IdentificationCategoryText>GOES</ns4:IdentificationCategoryText>
+            </ns4:Identification>
+            <ns4:Identification ns1:id="_e7f24765-e432-4202-9fe3-e92e0f943010">
+                <ns4:IdentificationID>UKCRTETRVLR2</ns4:IdentificationID>
+                <ns4:IdentificationCategoryText>UK GET CODE</ns4:IdentificationCategoryText>
+            </ns4:Identification>
+            <ns3:Document ns1:id="_e3efb113-d072-4391-b30d-86fc53bc709d">
+                <ns4:DocumentCategoryID>Passport</ns4:DocumentCategoryID>
+                <ns4:DocumentCountryISO3166Alpha3Code>GBR</ns4:DocumentCountryISO3166Alpha3Code>
+                <ns4:DocumentExpirationDate>
+                    <ns4:Date>2018-12-12</ns4:Date>
+                </ns4:DocumentExpirationDate>
+                <ns4:DocumentIdentification ns1:id="_1857c4cc-2802-4509-80bf-e004ee6fc53d">
+                    <ns4:IdentificationID>3400054388</ns4:IdentificationID>
+                    <ns4:IdentificationCategoryText>Document</ns4:IdentificationCategoryText>
+                </ns4:DocumentIdentification>
+                <ns4:PersonName>
+                    <ns4:PersonGivenName>Jonny</ns4:PersonGivenName>
+                    <ns4:PersonMiddleName>B.</ns4:PersonMiddleName>
+                    <ns4:PersonSurName>Good</ns4:PersonSurName>
+                </ns4:PersonName>
+                <ns4:PersonBirthDate>
+                    <ns4:Date>1945-12-12</ns4:Date>
+                </ns4:PersonBirthDate>
+            </ns3:Document>
+            <ns3:Document ns1:id="_e3efb113-d072-4391-b30d-86fc53bc710d">
+                <ns4:DocumentCategoryID>Passport</ns4:DocumentCategoryID>
+                <ns4:DocumentCountryISO3166Alpha3Code>GBR</ns4:DocumentCountryISO3166Alpha3Code>
+                <ns4:DocumentExpirationDate>
+                    <ns4:Date>2019-01-01</ns4:Date>
+                </ns4:DocumentExpirationDate>
+                <ns4:DocumentIdentification ns1:id="_1857c4cc-2802-4509-80bf-e004ee6fc53e">
+                    <ns4:IdentificationID>3400054389</ns4:IdentificationID>
+                    <ns4:IdentificationCategoryText>Document</ns4:IdentificationCategoryText>
+                </ns4:DocumentIdentification>
+                <ns4:PersonName>
+                    <ns4:PersonGivenName>Jonathan</ns4:PersonGivenName>
+                    <ns4:PersonMiddleName>B.</ns4:PersonMiddleName>
+                    <ns4:PersonSurName>Good</ns4:PersonSurName>
+                </ns4:PersonName>
+                <ns4:PersonBirthDate>
+                    <ns4:Date>1945-12-12</ns4:Date>
+                </ns4:PersonBirthDate>
+            </ns3:Document>
+            <ns3:Document ns1:id="_2e5f7567-190d-431b-af49-8b7b6ce97112">
+                <ns4:DocumentCategoryID>Visa Document</ns4:DocumentCategoryID>
+                <ns4:DocumentCountryISO3166Alpha3Code>USA</ns4:DocumentCountryISO3166Alpha3Code>
+                <ns4:DocumentExpirationDate>
+                    <ns4:Date>2019-12-12</ns4:Date>
+                </ns4:DocumentExpirationDate>
+                <ns4:DocumentIdentification ns1:id="_beaea304-d4a0-4ccd-b7df-6e71a20fa22e">
+                    <ns4:IdentificationID>430003444</ns4:IdentificationID>
+                    <ns4:IdentificationCategoryText>Document</ns4:IdentificationCategoryText>
+                </ns4:DocumentIdentification>
+                <ns4:PersonName>
+                    <ns4:PersonGivenName>test</ns4:PersonGivenName>
+                    <ns4:PersonSurName>ukget</ns4:PersonSurName>
+                </ns4:PersonName>
+                <ns4:PersonBirthDate>
+                    <ns4:Date>1945-12-12</ns4:Date>
+                </ns4:PersonBirthDate>
+                <ns3:ClassOfAdmission>A2</ns3:ClassOfAdmission>
+            </ns3:Document>
+            <ns4:Address ns1:id="_fe03637f-b228-46d0-a497-1ea4e04304ff">
+                <ns3:StructuredAddress>
+                    <ns4:LocationStreet>
+                        <ns4:StreetNumberText>1187</ns4:StreetNumberText>
+                        <ns4:StreetName>Main St</ns4:StreetName>
+                    </ns4:LocationStreet>
+                    <ns4:LocationCityName>Rockville</ns4:LocationCityName>
+                    <ns4:LocationCountryISO3166Alpha3Code>GBR</ns4:LocationCountryISO3166Alpha3Code>
+                </ns3:StructuredAddress>
+            </ns4:Address>
+            <ns4:Address ns1:id="_31222903-1c00-44b6-aa1b-2f6b1b6d661b">
+                <ns3:StructuredAddress>
+                    <ns4:LocationStreet>
+                        <ns4:StreetName>zero</ns4:StreetName>
+                    </ns4:LocationStreet>
+                    <ns4:LocationCityName>sample</ns4:LocationCityName>
+                    <ns3:LocationStateCode>AL</ns3:LocationStateCode>
+                    <ns4:LocationCountryISO3166Alpha3Code>USA</ns4:LocationCountryISO3166Alpha3Code>
+                    <ns4:LocationPostalCode>21133</ns4:LocationPostalCode>
+                </ns3:StructuredAddress>
+            </ns4:Address>
+
+            <ns3:PersonRequestAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns3:RequestReference ns1:ref="_9bdc9b15-be05-4458-80db-d14502f18f1c"/>
+            </ns3:PersonRequestAssociation>
+
+            <ns3:PersonAddressAssociation>
+                <ns4:AssociationBeginDate>
+                    <ns4:Date>1999-12-01</ns4:Date>
+                </ns4:AssociationBeginDate>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns4:AddressReference ns1:ref="_fe03637f-b228-46d0-a497-1ea4e04304ff"/>
+                <ns3:Category>Main resident address</ns3:Category>
+            </ns3:PersonAddressAssociation>
+            <ns3:PersonAddressAssociation>
+                <ns4:AssociationBeginDate>
+                    <ns4:Date>1998-12-01</ns4:Date>
+                </ns4:AssociationBeginDate>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns4:AddressReference ns1:ref="_31222903-1c00-44b6-aa1b-2f6b1b6d661b"/>
+                <ns3:Category>US contact address</ns3:Category>
+            </ns3:PersonAddressAssociation>
+
+            <ns4:TelephoneNumber ns1:id="_6eeb09b4-2e17-4cf3-a647-dc208592a563">
+                <ns4:NANPTelephoneNumber>
+                    <ns4:TelephoneAreaCodeID>445</ns4:TelephoneAreaCodeID>
+                    <ns4:TelephoneExchangeID>455</ns4:TelephoneExchangeID>
+                    <ns4:TelephoneLineID>6667</ns4:TelephoneLineID>
+                </ns4:NANPTelephoneNumber>
+            </ns4:TelephoneNumber>
+            <ns4:TelephoneNumber ns1:id="_fc7e8d47-475c-4b34-8073-7fc1ad3eab36">
+                <ns4:NANPTelephoneNumber>
+                    <ns4:TelephoneAreaCodeID>334</ns4:TelephoneAreaCodeID>
+                    <ns4:TelephoneExchangeID>333</ns4:TelephoneExchangeID>
+                    <ns4:TelephoneLineID>3333</ns4:TelephoneLineID>
+                </ns4:NANPTelephoneNumber>
+            </ns4:TelephoneNumber>
+
+            <ns3:PersonPhoneAssociation>
+                <ns4:AssociationBeginDate>
+                    <ns4:Date>1999-12-01</ns4:Date>
+                </ns4:AssociationBeginDate>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns4:TelephoneNumberReference ns1:ref="_6eeb09b4-2e17-4cf3-a647-dc208592a563"/>
+                <ns3:Category>Home phone</ns3:Category>
+            </ns3:PersonPhoneAssociation>
+            <ns3:PersonPhoneAssociation>
+                <ns4:AssociationBeginDate>
+                    <ns4:Date>1998-12-01</ns4:Date>
+                </ns4:AssociationBeginDate>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns4:TelephoneNumberReference ns1:ref="_fc7e8d47-475c-4b34-8073-7fc1ad3eab36"/>
+                <ns3:Category>Home phone</ns3:Category>
+            </ns3:PersonPhoneAssociation>
+            <ns4:Organization ns1:id="_c42382f1-b82f-4890-812c-def6b1b2b090">
+                <ns4:OrganizationName>NOT PROVIDED</ns4:OrganizationName>
+            </ns4:Organization>
+            <ns4:PersonEmploymentAssociation>
+                <ns4:AssociationBeginDate>
+                    <ns4:Date>1998-12-01</ns4:Date>
+                </ns4:AssociationBeginDate>
+                <ns4:EmployeeReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns4:Employer>
+                    <ns4:EntityOrganizationReference ns1:ref="_c42382f1-b82f-4890-812c-def6b1b2b090"/>
+                </ns4:Employer>
+                <ns4:EmploymentStatus>
+                    <ns4:StatusText>Retired</ns4:StatusText>
+                </ns4:EmploymentStatus>
+            </ns4:PersonEmploymentAssociation>
+
+            <ns4:PersonDocumentAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns4:DocumentReference ns1:ref="_e3efb113-d072-4391-b30d-86fc53bc709d"/>
+            </ns4:PersonDocumentAssociation>
+            <ns4:PersonDocumentAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns4:DocumentReference ns1:ref="_e3efb113-d072-4391-b30d-86fc53bc710d"/>
+            </ns4:PersonDocumentAssociation>
+            <ns4:PersonDocumentAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns4:DocumentReference ns1:ref="_2e5f7567-190d-431b-af49-8b7b6ce97112"/>
+            </ns4:PersonDocumentAssociation>
+
+            <ns3:PersonIdentificationAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns3:IdentificationReference ns1:ref="_a69687f2-bbe8-4715-a9a3-5770da924591"/>
+            </ns3:PersonIdentificationAssociation>
+            <ns3:PersonIdentificationAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns3:IdentificationReference ns1:ref="_5ec7ecda-d042-4f7b-b0a8-8c4bd237d587"/>
+            </ns3:PersonIdentificationAssociation>
+            <ns3:PersonIdentificationAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns3:IdentificationReference ns1:ref="_e7f24765-e432-4202-9fe3-e92e0f943010"/>
+            </ns3:PersonIdentificationAssociation>
+
+            <ns3:PersonAnswerAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns3:AnswerReference ns1:ref="_eed619d9-6f5b-46c9-bb94-cdc50aadfa6f"/>
+            </ns3:PersonAnswerAssociation>
+            <ns3:PersonAnswerAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns3:AnswerReference ns1:ref="_5ea5896b-2d88-45f4-8113-fa04332648b2"/>
+            </ns3:PersonAnswerAssociation>
+            <ns3:PersonAnswerAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns3:AnswerReference ns1:ref="_a51b895e-486d-4b84-b259-b55e966c8337"/>
+            </ns3:PersonAnswerAssociation>
+            <ns3:PersonAnswerAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns3:AnswerReference ns1:ref="_19a85255-9cd3-41fc-9351-73546b77fcc2"/>
+            </ns3:PersonAnswerAssociation>
+            <ns3:PersonAnswerAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns3:AnswerReference ns1:ref="_31c3c6e7-253c-4c52-97e7-d60bb23faacb"/>
+            </ns3:PersonAnswerAssociation>
+            <ns3:PersonAnswerAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns3:AnswerReference ns1:ref="_e2b55e47-0c90-4368-9c87-803da7f3349f"/>
+            </ns3:PersonAnswerAssociation>
+            <ns3:PersonAnswerAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns3:AnswerReference ns1:ref="_ecdae6b6-ad86-4a2f-baa6-578770806748"/>
+            </ns3:PersonAnswerAssociation>
+            <ns3:PersonAnswerAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns3:AnswerReference ns1:ref="_4d8531ab-79f1-41ed-9611-cd14e325d86d"/>
+            </ns3:PersonAnswerAssociation>
+
+            <ns4:ResidenceAssociation>
+                <ns4:PersonReference ns1:ref="_baa44fbb-8655-475d-a778-34cd4e18223c"/>
+                <ns4:LocationReference ns1:ref="_d7c3602a-f8e8-4bea-af37-950098597b0d"/>
+            </ns4:ResidenceAssociation>
+
+        </ns3:GES>
+    </ns3:Response>
+</ns7:GESMessage>
+

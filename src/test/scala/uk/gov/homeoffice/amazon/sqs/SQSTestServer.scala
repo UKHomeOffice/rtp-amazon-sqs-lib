@@ -1,6 +1,8 @@
 package uk.gov.homeoffice.amazon.sqs
 
 import java.net.URL
+import akka.stream.ActorMaterializer
+import play.api.libs.ws.ning.NingWSClient
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.sqs.AmazonSQSClient
 import org.elasticmq.rest.sqs.SQSRestServerBuilder
@@ -33,5 +35,13 @@ trait SQSTestServer extends SQSServer with Scope with ComposableAround {
 
     val sqsClient = new AmazonSQSClient(new BasicAWSCredentials("x", "x"))
     sqsClient.setEndpoint(sqsHost.toString)
+  }
+
+  trait SQSTestQueue extends Queue {
+    this: SQSTestClient =>
+
+    val queueName = "test-queue"
+
+    sqsClient.createQueue(queueName)
   }
 }

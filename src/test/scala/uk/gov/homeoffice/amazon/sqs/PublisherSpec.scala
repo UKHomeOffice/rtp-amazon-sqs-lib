@@ -7,7 +7,7 @@ class PublisherSpec extends Specification {
   "Publisher" should {
     "publish some text" in new SQSTestServer {
       val publisher = new Publisher with SQSTestClient with SQSTestQueue
-      publisher.publish("Testing 1, 2, 3")
+      publisher publish "Testing 1, 2, 3"
 
       val subscriber = new Subscriber with SQSTestClient with SQSTestQueue
 

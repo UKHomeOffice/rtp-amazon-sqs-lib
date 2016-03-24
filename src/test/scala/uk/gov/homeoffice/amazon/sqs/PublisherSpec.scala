@@ -6,10 +6,12 @@ import org.specs2.mutable.Specification
 class PublisherSpec extends Specification {
   "Publisher" should {
     "publish some text" in new SQSTestServer {
-      val publisher = new Publisher with SQSTestClient with SQSTestQueue
+      val queue = createQueue(new Queue("test-queue"))
+
+      val publisher = new Publisher(queue)
       publisher publish "Testing 1, 2, 3"
 
-      val subscriber = new Subscriber with SQSTestClient with SQSTestQueue
+      val subscriber = new Subscriber(queue)
 
       subscriber.receive must beLike {
         case Seq(m: Message) => m.getBody mustEqual "Testing 1, 2, 3"

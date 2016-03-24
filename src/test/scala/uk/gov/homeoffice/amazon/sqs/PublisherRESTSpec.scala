@@ -11,9 +11,9 @@ import uk.gov.homeoffice.akka.ActorSystemContext
 class PublisherRESTSpec(implicit ev: ExecutionEnv) extends Specification {
   "Publisher" should {
     "post some text" in new ActorSystemContext with SQSTestServer with REST {
-      val subscriber = new Subscriber with SQSTestClient with SQSTestQueue
+      val queue = createQueue(new Queue("test-queue"))
 
-      val result = wsClient.url(s"$sqsHost/queue/${subscriber.queueName}")
+      val result = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
                            .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
                            .post(params("Action" -> "SendMessage", "MessageBody" -> "Testing 1, 2, 3")) map { response =>
         (response.status, response.xml)
@@ -23,6 +23,8 @@ class PublisherRESTSpec(implicit ev: ExecutionEnv) extends Specification {
         case (status, xml) =>
           status mustEqual OK
           xml.head.label mustEqual "SendMessageResponse"
+
+          val subscriber = new Subscriber(queue)
 
           subscriber.receive must beLike {
             case Seq(m: Message) => m.getBody mustEqual "Testing 1, 2, 3"

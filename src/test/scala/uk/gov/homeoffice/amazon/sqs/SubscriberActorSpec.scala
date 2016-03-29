@@ -28,24 +28,32 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
         new SubscriberActor(new Subscriber(createQueue(new Queue("test-queue"))))(process)
       }
 
-      actor.underlyingActor receive new Message().withBody(input)
+      actor.underlyingActor receive createMessage(input)
 
       result.future must beEqualTo(Good(input)).await
     }
 
     "reject a string" in new ActorSystemContext with SQSTestServer {
+      val queue = createQueue(new Queue("test-queue"))
+
       val input = "blah"
       val result = Promise[String Or ErrorMessage]()
 
       val process = (m: Message) => promised(result, Bad(m.getBody))
 
       val actor = TestActorRef {
-        new SubscriberActor(new Subscriber(createQueue(new Queue("test-queue"))))(process)
+        new SubscriberActor(new Subscriber(queue))(process)
       }
 
-      actor.underlyingActor receive new Message().withBody(input)
+      val errorSubscriber = new Subscriber(queue)
+
+      actor.underlyingActor receive createMessage(input)
 
       result.future must beEqualTo(Bad(input)).await
+
+      errorSubscriber.receiveErrors must beLike {
+        case Seq(m: Message) => m.getBody mustEqual input
+      }
     }
 
     "receive JSON" in new ActorSystemContext with SQSTestServer {
@@ -58,7 +66,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
         new SubscriberActor(new Subscriber(createQueue(new Queue("test-queue"))))(process)
       }
 
-      actor.underlyingActor receive new Message().withBody(compact(render(input)))
+      actor.underlyingActor receive createMessage(compact(render(input)))
 
       result.future must beEqualTo(Good(input)).await
     }

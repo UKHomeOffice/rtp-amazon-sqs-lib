@@ -7,5 +7,5 @@ class Publisher(val queue: Queue)(implicit val sqsClient: SQSClient) {
 
   def publishError(message: String): MessageID = publish(message, queue.errorQueueName).getMessageId
 
-  private def publish(message: String, queueName: String): SendMessageResult = sqsClient.sendMessage(s"${sqsClient.sqsHost}/queue/$queueName", message)
+  private def publish(message: String, queueName: String): SendMessageResult = sqsClient.sendMessage(queueUrl(queueName), message)
 }

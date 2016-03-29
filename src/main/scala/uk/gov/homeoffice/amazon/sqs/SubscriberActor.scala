@@ -11,9 +11,16 @@ object SubscriberActor {
 class SubscriberActor[Result](subscriber: Subscriber)(process: Message => Result Or ErrorMessage) extends Actor {
   import SubscriberActor._
 
-  val sqsClient = subscriber.sqsClient
+  implicit val sqsClient = subscriber.sqsClient
   val queue = subscriber.queue
   val publisher = new Publisher(queue)(sqsClient)
+
+  val deleteMessage = (m: Message) => sqsClient.deleteMessage(queueUrl(queue.queueName), m.getReceiptHandle)
+
+  val publishErrorMessage = (e: ErrorMessage, m: Message) => {
+    publisher.publishError(e)
+    deleteMessage(m)
+  }
 
   override def preStart() = {
     super.preStart()
@@ -27,7 +34,7 @@ class SubscriberActor[Result](subscriber: Subscriber)(process: Message => Result
       subscriber.receive foreach { self ! _ }
 
     case m: Message =>
-      process(m) map { _ => /* TODO sqsClient.deleteMessage(queue.queueName, m.getMessageId)*/ } badMap publisher.publishError
+      process(m) map { _ => deleteMessage } badMap { e => publishErrorMessage(e, m) }
       self ! Subscribe
   }
 

@@ -1,5 +1,7 @@
 package uk.gov.homeoffice.amazon.sqs
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import akka.actor.Actor
 import com.amazonaws.services.sqs.model.Message
 import org.scalactic.{ErrorMessage, Or}
@@ -31,7 +33,10 @@ class SubscriberActor[Result](subscriber: Subscriber)(process: Message => Result
 
   final def receive: Receive = {
     case Subscribe =>
-      subscriber.receive foreach { self ! _ }
+      subscriber.receive match {
+        case Nil => context.system.scheduler.scheduleOnce(10 seconds, self, Subscribe)
+        case messages => messages foreach { self ! _ }
+      }
 
     case m: Message =>
       process(m) map { _ => deleteMessage } badMap { e => publishErrorMessage(e, m) }

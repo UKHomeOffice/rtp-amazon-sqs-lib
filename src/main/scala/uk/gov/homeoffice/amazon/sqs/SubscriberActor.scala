@@ -4,13 +4,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import akka.actor.Actor
 import com.amazonaws.services.sqs.model.Message
-import org.scalactic.{ErrorMessage, Or}
+import org.scalactic.ErrorMessage
+import uk.gov.homeoffice.amazon.sqs.message.MessageProcessor
 
 object SubscriberActor {
   case object Subscribe
 }
 
-class SubscriberActor[Result](subscriber: Subscriber)(process: Message => Result Or ErrorMessage) extends Actor {
+class SubscriberActor(subscriber: Subscriber) extends Actor {
+  this: MessageProcessor[_] =>
+
   import SubscriberActor._
 
   implicit val sqsClient = subscriber.sqsClient

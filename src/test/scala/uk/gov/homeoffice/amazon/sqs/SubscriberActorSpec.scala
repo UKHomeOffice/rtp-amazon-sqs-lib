@@ -10,6 +10,7 @@ import org.scalactic.{Bad, ErrorMessage, Good, Or}
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
+import uk.gov.homeoffice.amazon.sqs.message.MessageProcessor
 
 class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
   def promised[R](result: Promise[R], processed: R) = {
@@ -22,10 +23,10 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       val input = "blah"
       val result = Promise[String Or ErrorMessage]()
 
-      val process = (m: Message) => promised(result, Good(m.getBody))
-
       val actor = TestActorRef {
-        new SubscriberActor(new Subscriber(createQueue(new Queue("test-queue"))))(process)
+        new SubscriberActor(new Subscriber(createQueue(new Queue("test-queue")))) with MessageProcessor[String] {
+          def process(message: Message) = promised(result, Good(message.getBody))
+        }
       }
 
       actor.underlyingActor receive createMessage(input)
@@ -34,15 +35,15 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
     }
 
     "reject a string" in new ActorSystemContext with SQSTestServer {
-      val queue = createQueue(new Queue("test-queue"))
-
       val input = "blah"
       val result = Promise[String Or ErrorMessage]()
 
-      val process = (m: Message) => promised(result, Bad(m.getBody))
+      val queue = createQueue(new Queue("test-queue"))
 
       val actor = TestActorRef {
-        new SubscriberActor(new Subscriber(queue))(process)
+        new SubscriberActor(new Subscriber(queue)) with MessageProcessor[String] {
+          def process(message: Message): String Or ErrorMessage = promised(result, Bad(message.getBody))
+        }
       }
 
       val errorSubscriber = new Subscriber(queue)
@@ -60,10 +61,10 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       val input = JObject("input" -> JString("blah"))
       val result = Promise[JValue Or ErrorMessage]()
 
-      val process = (m: Message) => promised(result, Good(parse(m.getBody)))
-
       val actor = TestActorRef {
-        new SubscriberActor(new Subscriber(createQueue(new Queue("test-queue"))))(process)
+        new SubscriberActor(new Subscriber(createQueue(new Queue("test-queue")))) with MessageProcessor[JValue] {
+          def process(message: Message): JValue Or ErrorMessage = promised(result, Good(parse(message.getBody)))
+        }
       }
 
       actor.underlyingActor receive createMessage(compact(render(input)))

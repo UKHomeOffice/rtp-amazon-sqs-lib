@@ -9,7 +9,7 @@ import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
 
 class PublisherRESTSpec(implicit ev: ExecutionEnv) extends Specification {
-  "Publisher" should {
+  "Restful client" should {
     "post some text" in new ActorSystemContext with SQSEmbeddedServer with REST {
       val queue = createQueue(new Queue("test-queue"))
 

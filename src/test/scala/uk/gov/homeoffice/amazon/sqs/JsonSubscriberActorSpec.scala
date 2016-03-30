@@ -1,7 +1,6 @@
 package uk.gov.homeoffice.amazon.sqs
 
 import scala.concurrent.Promise
-import scala.util.Try
 import akka.testkit.TestActorRef
 import com.amazonaws.services.sqs.model.Message
 import org.json4s.JsonAST.JObject
@@ -16,16 +15,16 @@ import uk.gov.homeoffice.amazon.sqs.message.JsonProcessor
 import uk.gov.homeoffice.json.JsonSchema
 
 class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
-  spec =>
-
-  val jsonSchema = JsonSchema(
-    ("id" -> "http://www.bad.com/schema") ~
-    ("$schema" -> "http://json-schema.org/draft-04/schema") ~
-    ("type" -> "object") ~
-    ("properties" ->
-      ("input" ->
-        ("type" -> "string")))
-  )
+  trait JsonToStringProcessor extends JsonProcessor[String] {
+    val jsonSchema = JsonSchema(
+      ("id" -> "http://www.bad.com/schema") ~
+      ("$schema" -> "http://json-schema.org/draft-04/schema") ~
+      ("type" -> "object") ~
+      ("properties" ->
+        ("input" ->
+          ("type" -> "string")))
+    )
+  }
 
   def promised[R](result: Promise[R], processed: R) = {
     result.success(processed)
@@ -40,10 +39,8 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       val queue = createQueue(new Queue("test-queue"))
 
       val actor = TestActorRef {
-        new SubscriberActor(new Subscriber(queue)) with JsonProcessor[String] {
-          val jsonSchema = spec.jsonSchema
-
-          def process(json: JValue): Try[String] = promised(result, Good("Well Done!")).badMap(_ => new Exception).toTry
+        new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor {
+          def process(json: JValue) = promised(result, Good("Well Done!")).badMap(_ => new Exception).toTry
         }
       }
 
@@ -63,10 +60,8 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       val queue = createQueue(new Queue("test-queue"))
 
       val actor = TestActorRef {
-        new SubscriberActor(new Subscriber(queue)) with JsonProcessor[String] {
-          val jsonSchema = spec.jsonSchema
-
-          def process(json: JValue): Try[String] = promised(result, Good("Well Done!")).badMap(_ => new Exception).toTry
+        new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor {
+          def process(json: JValue) = promised(result, Good("Well Done!")).badMap(_ => new Exception).toTry
         }
       }
 

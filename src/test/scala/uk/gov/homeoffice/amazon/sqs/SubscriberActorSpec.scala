@@ -46,11 +46,11 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
         }
       }
 
-      val errorSubscriber = new Subscriber(queue)
-
       actor.underlyingActor receive createMessage(input)
 
       result.future must beEqualTo(Bad(input)).await
+
+      val errorSubscriber = new Subscriber(queue)
 
       errorSubscriber.receiveErrors must beLike {
         case Seq(m: Message) => m.getBody mustEqual input

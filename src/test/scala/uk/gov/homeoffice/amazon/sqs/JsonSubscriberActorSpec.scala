@@ -45,9 +45,9 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
         }
       }
 
-      val errorSubscriber = new Subscriber(queue)
-
       actor.underlyingActor receive createMessage(compact(render(input)))
+
+      val errorSubscriber = new Subscriber(queue)
 
       errorSubscriber.receiveErrors must beLike {
         case Seq(m: Message) => m.getBody must contain("error: instance type (integer) does not match any allowed primitive type")
@@ -87,9 +87,9 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
         }
       }
 
-      val errorSubscriber = new Subscriber(queue)
-
       publisher publish compact(render(input))
+
+      val errorSubscriber = new Subscriber(queue)
 
       eventually {
         errorSubscriber.receiveErrors must beLike {

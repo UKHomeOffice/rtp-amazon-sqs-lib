@@ -20,20 +20,17 @@ class SubscriberActor(subscriber: Subscriber) extends Actor {
   val queue = subscriber.queue
   val publisher = new Publisher(queue)(sqsClient)
 
-  val deleteMessage = (m: Message) => sqsClient.deleteMessage(queueUrl(queue.queueName), m.getReceiptHandle)
-
-  val publishErrorMessage = (e: ErrorMessage, m: Message) => {
-    publisher.publishError(e)
-    deleteMessage(m)
-  }
-
+  /** Upon instantiating this actor, create its associated queues and start subscribing */
   override def preStart() = {
+    def createQueue(queueName: String) = sqsClient createQueue queueName
+
     super.preStart()
     createQueue(queue.queueName)
     createQueue(queue.errorQueueName)
     self ! Subscribe
   }
 
+  /** The actor's "main" method to process messages in its own mailbox (i.e. its own message queue) */
   final def receive: Receive = {
     case Subscribe =>
       subscriber.receive match {
@@ -42,9 +39,16 @@ class SubscriberActor(subscriber: Subscriber) extends Actor {
       }
 
     case m: Message =>
-      process(m) map { _ => deleteMessage } badMap { e => publishErrorMessage(e, m) }
+      process(m) map { _ => deleteMessage(m) } badMap { e => publishErrorMessage(e, m) }
       self ! Subscribe
   }
 
-  private def createQueue(queueName: String) = sqsClient createQueue queueName
+  /** Override this method for custom deletion of messages from the message queue */
+  def deleteMessage(m: Message) = sqsClient.deleteMessage(queueUrl(queue.queueName), m.getReceiptHandle)
+
+  /** Override this method for custom publication of error messages to the error message queue e.g. maybe error should not be published */
+  def publishErrorMessage(e: ErrorMessage, m: Message) = {
+    publisher.publishError(e)
+    deleteMessage(m)
+  }
 }

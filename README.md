@@ -115,15 +115,15 @@ Example Usage
 Example of booting an application to publish/subscribe to an Amazon SQS instance.
 
 1) Start up an instance of ElasticMQ (to run an instance of Amazon SQS locally) - From the root of this project:
-   ```bash
-   java -jar elasticmq-server-0.9.0.jar
-   ```
-   which starts up a working server that binds to localhost:9324
+```bash
+java -jar elasticmq-server-0.9.0.jar
+```
+which starts up a working server that binds to localhost:9324
    
 2) Boot this application:
-   ```bash
-   sbt test:run
-   ```
+```bash
+sbt test:run
+```
    
 where the example application can be found under the "test" directory and is also show here:
 ```bash

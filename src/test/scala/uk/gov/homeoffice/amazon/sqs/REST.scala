@@ -6,7 +6,7 @@ import play.api.libs.ws.ning.NingWSClient
 import uk.gov.homeoffice.akka.ActorSystemContext
 
 trait REST {
-  this: ActorSystemContext with SQSTestServer =>
+  this: ActorSystemContext with SQSEmbeddedServer =>
 
   implicit val materializer = ActorMaterializer()
 

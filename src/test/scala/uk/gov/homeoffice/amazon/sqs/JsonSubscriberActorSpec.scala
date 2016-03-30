@@ -32,7 +32,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
   }
 
   "Subscriber actor" should {
-    "receive JSON and fail to validate" in new ActorSystemContext with SQSTestServer {
+    "receive JSON and fail to validate" in new ActorSystemContext with SQSEmbeddedServer {
       val input = JObject("input" -> JInt(0), "extra" -> JString("blah"))
       val result = Promise[String Or ErrorMessage]()
 
@@ -53,7 +53,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       }
     }
 
-    "receive valid JSON" in new ActorSystemContext with SQSTestServer {
+    "receive valid JSON" in new ActorSystemContext with SQSEmbeddedServer {
       val input = JObject("input" -> JString("blah"))
       val result = Promise[String Or ErrorMessage]()
 

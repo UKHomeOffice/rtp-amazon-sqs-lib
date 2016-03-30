@@ -10,7 +10,7 @@ import uk.gov.homeoffice.akka.ActorSystemContext
 
 class PublisherRESTSpec(implicit ev: ExecutionEnv) extends Specification {
   "Publisher" should {
-    "post some text" in new ActorSystemContext with SQSTestServer with REST {
+    "post some text" in new ActorSystemContext with SQSEmbeddedServer with REST {
       val queue = createQueue(new Queue("test-queue"))
 
       val result = wsClient.url(s"$sqsHost/queue/${queue.queueName}")

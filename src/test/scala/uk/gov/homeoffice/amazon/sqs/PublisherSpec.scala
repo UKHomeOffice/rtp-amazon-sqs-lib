@@ -5,7 +5,7 @@ import org.specs2.mutable.Specification
 
 class PublisherSpec extends Specification {
   "Publisher" should {
-    "publish some text" in new SQSTestServer {
+    "publish some text" in new SQSEmbeddedServer {
       val queue = createQueue(new Queue("test-queue"))
 
       val publisher = new Publisher(queue)

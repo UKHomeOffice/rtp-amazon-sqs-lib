@@ -1,6 +1,6 @@
 RTP Amazon SQS and ElasticMQ Library
 ====================================
-Scala library to interact with Amazon SQS and where ElasticMQ can be used for embedding testing of the SQS messaging system
+Scala library to interact with Amazon SQS and where ElasticMQ can be used for embedding testing of the SQS messaging system.
 
 Application built with the following (main) technologies:
 

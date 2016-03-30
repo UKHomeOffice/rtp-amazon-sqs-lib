@@ -110,4 +110,50 @@ To execute Gatling performance integration tests from withing SBT:
 gatling-it:test
 ```
 
-Note that as Gatling tests are integration tests, then a global-entry-integration-service must be running.
+Example Usage
+-------------
+Example of booting an application to publish/subscribe to an Amazon SQS instance.
+1) Start up an instance of ElasticMQ (to run an instance of Amazon SQS locally) - From the root of this project:
+   ```bash
+   java -jar elasticmq-server-0.9.0.jar
+   ```
+   which starts up a working server that binds to localhost:9324
+2) Boot this application:
+   ```bash
+   sbt test:run
+   ```
+   
+where the example application can be found under the "test" directory and is also show here:
+```bash
+object ExampleBoot extends App {
+  val system = ActorSystem("amazon-sqs-actor-system")
+
+  implicit val sqsClient = new SQSClient(new URL("http://localhost:9324"), new BasicAWSCredentials("x", "x"))
+
+  val queue = new Queue("test-queue")
+
+  system actorOf Props {
+    new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor
+  }
+
+  val publisher = new Publisher(queue)
+
+  publisher publish compact(render("input" -> "blah"))
+}
+
+trait JsonToStringProcessor extends JsonProcessor[String] {
+  val jsonSchema = JsonSchema(
+    ("id" -> "http://www.bad.com/schema") ~
+    ("$schema" -> "http://json-schema.org/draft-04/schema") ~
+    ("type" -> "object") ~
+    ("properties" ->
+      ("input" ->
+        ("type" -> "string")))
+  )
+
+  def process(json: JValue) = {
+    println(s"===> Subscriber got $json")
+    Success("Well Done!")
+  }
+}
+```

@@ -126,7 +126,7 @@ sbt test:run
 ```
    
 where the example application can be found under the "test" directory and is also show here:
-```bash
+```scala
 object ExampleBoot extends App {
   val system = ActorSystem("amazon-sqs-actor-system")
 

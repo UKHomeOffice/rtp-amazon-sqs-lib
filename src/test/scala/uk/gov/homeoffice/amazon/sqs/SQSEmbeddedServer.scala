@@ -17,7 +17,8 @@ trait SQSEmbeddedServer extends SQSServer with Scope with ComposableAround {
 
   val createQueue: Queue => Queue =
     queue => {
-      sqsClient.createQueue(queue.queueName)
+      sqsClient createQueue queue.queueName
+      sqsClient createQueue queue.errorQueueName
       queue
     }
 

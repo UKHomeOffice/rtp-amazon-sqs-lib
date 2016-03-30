@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.amazon.sqs
 
 import scala.concurrent.Promise
+import akka.actor.Props
 import akka.testkit.TestActorRef
 import com.amazonaws.services.sqs.model.Message
 import org.json4s.JsonAST.JObject
@@ -31,7 +32,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
     processed
   }
 
-  "Subscriber actor" should {
+  "Subscriber (test) actor" should {
     "receive JSON and fail to validate" in new ActorSystemContext with SQSEmbeddedServer {
       val input = JObject("input" -> JInt(0), "extra" -> JString("blah"))
       val result = Promise[String Or ErrorMessage]()
@@ -66,6 +67,52 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       }
 
       actor.underlyingActor receive createMessage(compact(render(input)))
+
+      result.future must beEqualTo(Good("Well Done!")).await
+    }
+  }
+
+  "Subscriber actor" should {
+    "receive JSON and fail to validate" in new ActorSystemContext with SQSEmbeddedServer {
+      val input = JObject("input" -> JInt(0), "extra" -> JString("blah"))
+      val result = Promise[String Or ErrorMessage]()
+
+      val queue = createQueue(new Queue("test-queue"))
+
+      val publisher = new Publisher(queue)
+
+      system actorOf Props {
+        new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor {
+          def process(json: JValue) = promised(result, Good("Well Done!")).badMap(_ => new Exception).toTry
+        }
+      }
+
+      val errorSubscriber = new Subscriber(queue)
+
+      publisher publish compact(render(input))
+
+      eventually {
+        errorSubscriber.receiveErrors must beLike {
+          case Seq(m: Message) => m.getBody must contain("error: instance type (integer) does not match any allowed primitive type")
+        }
+      }
+    }
+
+    "receive valid JSON" in new ActorSystemContext with SQSEmbeddedServer {
+      val input = JObject("input" -> JString("blah"))
+      val result = Promise[String Or ErrorMessage]()
+
+      val queue = createQueue(new Queue("test-queue"))
+
+      val publisher = new Publisher(queue)
+
+      system actorOf Props {
+        new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor {
+          def process(json: JValue) = promised(result, Good("Well Done!")).badMap(_ => new Exception).toTry
+        }
+      }
+
+      publisher publish compact(render(input))
 
       result.future must beEqualTo(Good("Well Done!")).await
     }

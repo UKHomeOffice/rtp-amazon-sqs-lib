@@ -35,9 +35,6 @@ object ExampleBoot extends App {
   }
 
   new Publisher(queue) publish compact(render("input" -> "blah"))
-
-  TimeUnit.SECONDS.sleep(3)
-  sys.exit()
 }
 
 trait JsonToStringProcessor extends JsonProcessor[String] {
@@ -53,6 +50,7 @@ trait JsonToStringProcessor extends JsonProcessor[String] {
   def process(json: JValue) = {
     val result = "Well Done!"
     println(result)
+    sys.exit()
     Success(result)
   }
 }

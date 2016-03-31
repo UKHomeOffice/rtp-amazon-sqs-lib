@@ -10,21 +10,14 @@ import org.specs2.matcher.Scope
 import de.flapdoodle.embed.process.runtime.Network._
 import uk.gov.homeoffice.specs2.ComposableAround
 
-trait SQSEmbeddedServer extends SQSServer with Scope with ComposableAround {
+trait SQSEmbeddedServer extends SQSServer with QueueCreation with Scope with ComposableAround {
   val sqsHost = new URL(s"http://localhost:$getFreeServerPort")
 
   implicit val sqsClient = new SQSClient(sqsHost, new BasicAWSCredentials("x", "x"))
 
-  val createQueue: Queue => Queue =
-    queue => {
-      sqsClient createQueue queue.queueName
-      sqsClient createQueue queue.errorQueueName
-      queue
-    }
-
   val createMessage: String => Message =
     message => {
-      val queue = createQueue(new Queue(UUID.randomUUID().toString))
+      val queue = create(new Queue(UUID.randomUUID().toString))
       val publisher = new Publisher(queue)
       val subscriber = new Subscriber(queue)
 

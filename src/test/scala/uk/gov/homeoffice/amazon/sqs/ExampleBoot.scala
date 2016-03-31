@@ -12,11 +12,15 @@ import uk.gov.homeoffice.json.JsonSchema
 
 /**
   * Example of booting an application to publish/subscribe to an Amazon SQS instance.
+  * <pre>
   * 1) Start up an instance of ElasticMQ (to run an instance of Amazon SQS locally) - From the root of this project:
   *    java -jar elasticmq-server-0.9.0.jar
+  *    OR with a configuration to e.g. set up queues
+  *    java -Dconfig.file=src/test/resources/application.test.conf -jar elasticmq-server-0.9.0.jar
   *    which starts up a working server that binds to localhost:9324
   * 2) Boot this application:
   *    sbt test:run
+  * </pre>   
   */
 object ExampleBoot extends App {
   val system = ActorSystem("amazon-sqs-actor-system")
@@ -29,9 +33,7 @@ object ExampleBoot extends App {
     new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor
   }
 
-  val publisher = new Publisher(queue)
-
-  publisher publish compact(render("input" -> "blah"))
+  new Publisher(queue) publish compact(render("input" -> "blah"))
 }
 
 trait JsonToStringProcessor extends JsonProcessor[String] {
@@ -45,7 +47,7 @@ trait JsonToStringProcessor extends JsonProcessor[String] {
   )
 
   def process(json: JValue) = {
-    println(s"===> Subscriber got $json")
+    println("Well Done!")
     Success("Well Done!")
   }
 }

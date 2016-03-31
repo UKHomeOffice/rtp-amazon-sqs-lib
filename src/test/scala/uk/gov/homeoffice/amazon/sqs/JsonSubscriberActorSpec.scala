@@ -37,7 +37,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       val input = JObject("input" -> JInt(0), "extra" -> JString("blah"))
       val result = Promise[String Or ErrorMessage]()
 
-      val queue = createQueue(new Queue("test-queue"))
+      val queue = create(new Queue("test-queue"))
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor {
@@ -58,7 +58,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       val input = JObject("input" -> JString("blah"))
       val result = Promise[String Or ErrorMessage]()
 
-      val queue = createQueue(new Queue("test-queue"))
+      val queue = create(new Queue("test-queue"))
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor {
@@ -77,7 +77,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       val input = JObject("input" -> JInt(0), "extra" -> JString("blah"))
       val result = Promise[String Or ErrorMessage]()
 
-      val queue = createQueue(new Queue("test-queue"))
+      val queue = create(new Queue("test-queue"))
 
       val publisher = new Publisher(queue)
 
@@ -102,7 +102,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       val input = JObject("input" -> JString("blah"))
       val result = Promise[String Or ErrorMessage]()
 
-      val queue = createQueue(new Queue("test-queue"))
+      val queue = create(new Queue("test-queue"))
 
       val publisher = new Publisher(queue)
 

@@ -24,7 +24,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       val result = Promise[String Or ErrorMessage]()
 
       val actor = TestActorRef {
-        new SubscriberActor(new Subscriber(createQueue(new Queue("test-queue")))) with MessageProcessor[String] {
+        new SubscriberActor(new Subscriber(create(new Queue("test-queue")))) with MessageProcessor[String] {
           def process(message: Message) = promised(result, Good(message.getBody))
         }
       }
@@ -38,7 +38,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       val input = "blah"
       val result = Promise[String Or ErrorMessage]()
 
-      val queue = createQueue(new Queue("test-queue"))
+      val queue = create(new Queue("test-queue"))
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) with MessageProcessor[String] {
@@ -62,7 +62,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       val result = Promise[JValue Or ErrorMessage]()
 
       val actor = TestActorRef {
-        new SubscriberActor(new Subscriber(createQueue(new Queue("test-queue")))) with MessageProcessor[JValue] {
+        new SubscriberActor(new Subscriber(create(new Queue("test-queue")))) with MessageProcessor[JValue] {
           def process(message: Message): JValue Or ErrorMessage = promised(result, Good(parse(message.getBody)))
         }
       }

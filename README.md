@@ -138,9 +138,7 @@ object ExampleBoot extends App {
     new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor
   }
 
-  val publisher = new Publisher(queue)
-
-  publisher publish compact(render("input" -> "blah"))
+  new Publisher(queue) publish compact(render("input" -> "blah"))
 }
 
 trait JsonToStringProcessor extends JsonProcessor[String] {
@@ -153,9 +151,6 @@ trait JsonToStringProcessor extends JsonProcessor[String] {
         ("type" -> "string")))
   )
 
-  def process(json: JValue) = {
-    println(s"===> Subscriber got $json")
-    Success("Well Done!")
-  }
+  def process(json: JValue) = Success("Well Done!")
 }
 ```

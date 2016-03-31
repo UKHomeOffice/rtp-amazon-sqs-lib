@@ -7,6 +7,10 @@ import org.json4s.jackson.JsonMethods.{parse => toJson, _}
 import org.scalactic.{Bad, Good, _}
 import uk.gov.homeoffice.json.{JsonError, JsonSchema}
 
+/**
+  * Process JSON from Amazon SQS where the JSON has been validated against a given JSON schema
+  * @tparam R The Result of processing a message
+  */
 trait JsonProcessor[R] extends MessageProcessor[R] {
   def jsonSchema: JsonSchema
 

@@ -11,7 +11,7 @@ object SubscriberActor {
   case object Subscribe
 }
 
-class SubscriberActor(subscriber: Subscriber) extends Actor {
+class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation {
   this: MessageProcessor[_] =>
 
   import SubscriberActor._
@@ -22,11 +22,8 @@ class SubscriberActor(subscriber: Subscriber) extends Actor {
 
   /** Upon instantiating this actor, create its associated queues and start subscribing */
   override def preStart() = {
-    def createQueue(queueName: String) = sqsClient createQueue queueName
-
     super.preStart()
-    createQueue(queue.queueName)
-    createQueue(queue.errorQueueName)
+    create(queue)
     self ! Subscribe
   }
 

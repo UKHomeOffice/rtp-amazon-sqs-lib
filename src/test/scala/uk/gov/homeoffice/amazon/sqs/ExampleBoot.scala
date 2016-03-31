@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.amazon.sqs
 
 import java.net.URL
+import java.util.concurrent.TimeUnit
 import scala.util.Success
 import akka.actor.{ActorSystem, Props}
 import com.amazonaws.auth.BasicAWSCredentials
@@ -20,7 +21,7 @@ import uk.gov.homeoffice.json.JsonSchema
   *    which starts up a working server that binds to localhost:9324
   * 2) Boot this application:
   *    sbt test:run
-  * </pre>   
+  * </pre>
   */
 object ExampleBoot extends App {
   val system = ActorSystem("amazon-sqs-actor-system")
@@ -34,6 +35,9 @@ object ExampleBoot extends App {
   }
 
   new Publisher(queue) publish compact(render("input" -> "blah"))
+
+  TimeUnit.SECONDS.sleep(3)
+  sys.exit()
 }
 
 trait JsonToStringProcessor extends JsonProcessor[String] {
@@ -47,7 +51,8 @@ trait JsonToStringProcessor extends JsonProcessor[String] {
   )
 
   def process(json: JValue) = {
-    println("Well Done!")
-    Success("Well Done!")
+    val result = "Well Done!"
+    println(result)
+    Success(result)
   }
 }

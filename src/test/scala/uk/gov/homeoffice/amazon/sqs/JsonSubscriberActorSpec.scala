@@ -3,6 +3,7 @@ package uk.gov.homeoffice.amazon.sqs
 import scala.concurrent.Promise
 import akka.actor.Props
 import akka.testkit.TestActorRef
+import play.api.http.Status.OK
 import com.amazonaws.services.sqs.model.Message
 import org.json4s.JsonAST.JObject
 import org.json4s.JsonDSL._
@@ -34,7 +35,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
 
   "Subscriber (test) actor" should {
     "receive JSON and fail to validate" in new ActorSystemContext with SQSEmbeddedServer {
-      val input = JObject("input" -> JInt(0), "extra" -> JString("blah"))
+      val input = JObject("input" -> JInt(0))
       val result = Promise[String Or ErrorMessage]()
 
       val queue = create(new Queue("test-queue"))
@@ -74,7 +75,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
 
   "Subscriber actor" should {
     "receive JSON and fail to validate" in new ActorSystemContext with SQSEmbeddedServer {
-      val input = JObject("input" -> JInt(0), "extra" -> JString("blah"))
+      val input = JObject("input" -> JInt(0))
       val result = Promise[String Or ErrorMessage]()
 
       val queue = create(new Queue("test-queue"))
@@ -115,6 +116,57 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       publisher publish compact(render(input))
 
       result.future must beEqualTo(Good("Well Done!")).await
+    }
+
+    "receive valid JSON from a RESTful POST" in new ActorSystemContext with SQSEmbeddedServer with REST {
+      val input = JObject("input" -> JString("blah"))
+      val result = Promise[String Or ErrorMessage]()
+
+      val queue = create(new Queue("test-queue"))
+
+      system actorOf Props {
+        new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor {
+          def process(json: JValue) = promised(result, Good("Well Done!")).badMap(_ => new Exception).toTry
+        }
+      }
+
+      val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
+                           .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
+                           .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(input)))) map { response =>
+        response.status
+      }
+
+      response must beEqualTo(OK).await
+      result.future must beEqualTo(Good("Well Done!")).await
+    }
+
+    "receive invalid JSON from a RESTful POST" in new ActorSystemContext with SQSEmbeddedServer with REST {
+      val input = JObject("input" -> JInt(0))
+      val result = Promise[String Or ErrorMessage]()
+
+      val queue = create(new Queue("test-queue"))
+
+      system actorOf Props {
+        new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor {
+          def process(json: JValue) = promised(result, Good("Well Done!")).badMap(_ => new Exception).toTry
+        }
+      }
+
+      val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
+                             .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
+                             .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(input)))) map { response =>
+        response.status
+      }
+
+      response must beEqualTo(OK).await
+
+      val errorSubscriber = new Subscriber(queue)
+
+      eventually {
+        errorSubscriber.receiveErrors must beLike {
+          case Seq(m: Message) => m.getBody must contain("error: instance type (integer) does not match any allowed primitive type")
+        }
+      }
     }
   }
 }

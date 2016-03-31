@@ -1,7 +1,6 @@
 package uk.gov.homeoffice.amazon.sqs
 
 import java.net.URL
-import java.util.concurrent.TimeUnit
 import scala.util.Success
 import akka.actor.{ActorSystem, Props}
 import com.amazonaws.auth.BasicAWSCredentials

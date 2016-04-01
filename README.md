@@ -141,7 +141,7 @@ object ExampleBoot extends App {
   new Publisher(queue) publish compact(render("input" -> "blah"))
 }
 
-trait JsonToStringProcessor extends JsonProcessor[String] {
+trait JsonToStringProcessor extends JsonProcessor[String] with Exit {
   val jsonSchema = JsonSchema(
     ("id" -> "http://www.bad.com/schema") ~
     ("$schema" -> "http://json-schema.org/draft-04/schema") ~
@@ -151,6 +151,10 @@ trait JsonToStringProcessor extends JsonProcessor[String] {
         ("type" -> "string")))
   )
 
-  def process(json: JValue) = Success("Well Done!")
+  def process(json: JValue) = exitAfter {
+    val result = Success("Well Done!")
+    println(result)
+    result
+  }
 }
 ```

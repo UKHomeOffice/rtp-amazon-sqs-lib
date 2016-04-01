@@ -9,6 +9,7 @@ import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import uk.gov.homeoffice.amazon.sqs.message.JsonProcessor
 import uk.gov.homeoffice.json.JsonSchema
+import uk.gov.homeoffice.system.Exit
 
 /**
   * Example of booting an application to publish/subscribe to an Amazon SQS instance.
@@ -36,7 +37,7 @@ object ExampleBoot extends App {
   new Publisher(queue) publish compact(render("input" -> "blah"))
 }
 
-trait JsonToStringProcessor extends JsonProcessor[String] {
+trait JsonToStringProcessor extends JsonProcessor[String] with Exit {
   val jsonSchema = JsonSchema(
     ("id" -> "http://www.bad.com/schema") ~
     ("$schema" -> "http://json-schema.org/draft-04/schema") ~
@@ -46,10 +47,9 @@ trait JsonToStringProcessor extends JsonProcessor[String] {
         ("type" -> "string")))
   )
 
-  def process(json: JValue) = {
-    val result = "Well Done!"
+  def process(json: JValue) = exitAfter {
+    val result = Success("Well Done!")
     println(result)
-    sys.exit()
-    Success(result)
+    result
   }
 }

@@ -14,7 +14,7 @@ object Build extends Build {
     .settings(run := (run in Runtime).evaluated) // Required to stop Gatling plugin overriding the default "run".
     .settings(
       name := moduleName,
-      organization := "kissthinker",
+      organization := "uk.gov.homeoffice",
       version := "1.0.0-SNAPSHOT",
       scalaVersion := "2.11.8",
       scalacOptions ++= Seq(

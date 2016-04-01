@@ -34,7 +34,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
   }
 
   "Subscriber (test) actor" should {
-    "receive JSON and fail to validate" in new ActorSystemContext with SQSEmbeddedServer {
+    "receive JSON and fail to validate" in new ActorSystemContext with EmbeddedSQSServer {
       val input = JObject("input" -> JInt(0))
       val result = Promise[String Or ErrorMessage]()
 
@@ -55,7 +55,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       }
     }
 
-    "receive valid JSON" in new ActorSystemContext with SQSEmbeddedServer {
+    "receive valid JSON" in new ActorSystemContext with EmbeddedSQSServer {
       val input = JObject("input" -> JString("blah"))
       val result = Promise[String Or ErrorMessage]()
 
@@ -74,7 +74,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
   }
 
   "Subscriber actor" should {
-    "receive JSON and fail to validate" in new ActorSystemContext with SQSEmbeddedServer {
+    "receive JSON and fail to validate" in new ActorSystemContext with EmbeddedSQSServer {
       val input = JObject("input" -> JInt(0))
       val result = Promise[String Or ErrorMessage]()
 
@@ -99,7 +99,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       }
     }
 
-    "receive valid JSON" in new ActorSystemContext with SQSEmbeddedServer {
+    "receive valid JSON" in new ActorSystemContext with EmbeddedSQSServer {
       val input = JObject("input" -> JString("blah"))
       val result = Promise[String Or ErrorMessage]()
 
@@ -118,7 +118,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       result.future must beEqualTo(Good("Well Done!")).await
     }
 
-    "receive valid JSON from a RESTful POST" in new ActorSystemContext with SQSEmbeddedServer with REST {
+    "receive valid JSON from a RESTful POST" in new ActorSystemContext with EmbeddedSQSServer with REST {
       val input = JObject("input" -> JString("blah"))
       val result = Promise[String Or ErrorMessage]()
 
@@ -140,7 +140,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       result.future must beEqualTo(Good("Well Done!")).await
     }
 
-    "receive invalid JSON from a RESTful POST" in new ActorSystemContext with SQSEmbeddedServer with REST {
+    "receive invalid JSON from a RESTful POST" in new ActorSystemContext with EmbeddedSQSServer with REST {
       val input = JObject("input" -> JInt(0))
       val result = Promise[String Or ErrorMessage]()
 

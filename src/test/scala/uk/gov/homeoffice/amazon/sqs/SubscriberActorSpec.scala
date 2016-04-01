@@ -19,7 +19,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
   }
 
   "Subscriber actor" should {
-    "receive a string" in new ActorSystemContext with SQSEmbeddedServer {
+    "receive a string" in new ActorSystemContext with EmbeddedSQSServer {
       val input = "blah"
       val result = Promise[String Or ErrorMessage]()
 
@@ -34,7 +34,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       result.future must beEqualTo(Good(input)).await
     }
 
-    "reject a string" in new ActorSystemContext with SQSEmbeddedServer {
+    "reject a string" in new ActorSystemContext with EmbeddedSQSServer {
       val input = "blah"
       val result = Promise[String Or ErrorMessage]()
 
@@ -57,7 +57,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       }
     }
 
-    "receive JSON" in new ActorSystemContext with SQSEmbeddedServer {
+    "receive JSON" in new ActorSystemContext with EmbeddedSQSServer {
       val input = JObject("input" -> JString("blah"))
       val result = Promise[JValue Or ErrorMessage]()
 

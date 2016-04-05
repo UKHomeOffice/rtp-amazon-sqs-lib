@@ -48,6 +48,8 @@ object Build extends Build {
       val `rtp-akka-lib-version` = "1.6.2-SNAPSHOT"
 
       Seq(
+        "org.elasticmq" %% "elasticmq-core" % `elasticmq-version` withSources(),
+        "org.elasticmq" %% "elasticmq-rest-sqs" % `elasticmq-version` withSources(),
         "com.typesafe.play" %% "play-ws" % `play-version` withSources(),
         "org.scalactic" %% "scalactic" % "2.2.6" withSources(),
         "ch.qos.logback" % "logback-classic" % "1.1.3" withSources(),
@@ -63,8 +65,6 @@ object Build extends Build {
         "com.typesafe.akka" %% "akka-testkit" % `akka-version` % Test withSources(),
         "com.typesafe.play" %% "play-test" % `play-version` % Test withSources(),
         "com.typesafe.play" %% "play-specs2" % `play-version` % Test withSources(),
-        "org.elasticmq" %% "elasticmq-core" % `elasticmq-version` % Test withSources(),
-        "org.elasticmq" %% "elasticmq-rest-sqs" % `elasticmq-version` % Test withSources(),
         "uk.gov.homeoffice" %% "rtp-test-lib" % `rtp-test-lib-version` % Test classifier "tests" withSources(),
         "uk.gov.homeoffice" %% "rtp-akka-lib" % `rtp-akka-lib-version` % Test classifier "tests" withSources() excludeAll ExclusionRule(organization = "io.spray")
       )

@@ -12,8 +12,10 @@ import uk.gov.homeoffice.json.{JsonError, JsonSchema}
   * @tparam R The Result of processing a message
   */
 trait JsonProcessor[R] extends MessageProcessor[R] {
+  /** Define JSON schema that will be used to validate JSON */
   def jsonSchema: JsonSchema
 
+  /** Define your process given validated JSON (i.e. the JSON given to your definition will be valid according to your JSON schema) */
   def process(json: JValue): Try[R]
 
   final def process(message: Message): R Or ErrorMessage = processWith(process)(message)

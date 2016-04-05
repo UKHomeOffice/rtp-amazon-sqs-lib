@@ -8,14 +8,8 @@ import org.scalactic.ErrorMessage
 import grizzled.slf4j.Logging
 import uk.gov.homeoffice.amazon.sqs.message.MessageProcessor
 
-object SubscriberActor {
-  case object Subscribe
-}
-
 class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation with Logging {
   this: MessageProcessor[_] =>
-
-  import SubscriberActor._
 
   implicit val sqsClient = subscriber.sqsClient
   val queue = subscriber.queue
@@ -41,7 +35,7 @@ class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation w
       self ! Subscribe
 
     case other =>
-      error(s"Received the following 'non Amazon SQS Message' (must have been sent to this actor directly instead of coming from an Amazon SQS queue): $other")
+      error(s"""Received message that is "${`not-amazon-sqs-message`}" (must have been sent to this actor directly instead of coming from an Amazon SQS queue): $other""")
   }
 
   /** Override this method for custom deletion of messages from the message queue */

@@ -5,13 +5,14 @@ import scala.concurrent.duration._
 import akka.actor.Actor
 import com.amazonaws.services.sqs.model.Message
 import org.scalactic.ErrorMessage
+import grizzled.slf4j.Logging
 import uk.gov.homeoffice.amazon.sqs.message.MessageProcessor
 
 object SubscriberActor {
   case object Subscribe
 }
 
-class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation {
+class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation with Logging {
   this: MessageProcessor[_] =>
 
   import SubscriberActor._
@@ -38,6 +39,9 @@ class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation {
     case m: Message =>
       process(m) map { _ => deleteMessage(m) } badMap { e => publishErrorMessage(e, m) }
       self ! Subscribe
+
+    case other =>
+      error(s"Received the following 'non Amazon SQS Message' (must have been sent to this actor directly instead of coming from an Amazon SQS queue): $other")
   }
 
   /** Override this method for custom deletion of messages from the message queue */

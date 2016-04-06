@@ -1,7 +1,8 @@
-package uk.gov.homeoffice.amazon.sqs
+package uk.gov.homeoffice.amazon.sqs.subscription
 
 import scala.collection.JavaConversions._
 import com.amazonaws.services.sqs.model.Message
+import uk.gov.homeoffice.amazon.sqs._
 
 class Subscriber(val queue: Queue)(implicit val sqsClient: SQSClient) extends QueueCreation {
   create(queue)

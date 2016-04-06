@@ -8,6 +8,7 @@ import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import uk.gov.homeoffice.amazon.sqs.message.JsonProcessor
+import uk.gov.homeoffice.amazon.sqs.subscription.{Subscriber, SubscriberActor}
 import uk.gov.homeoffice.json.JsonSchema
 import uk.gov.homeoffice.system.Exit
 
@@ -23,6 +24,7 @@ import uk.gov.homeoffice.system.Exit
   *    sbt test:run
   * </pre>
   */
+/*
 object ExampleBoot extends App {
   val system = ActorSystem("amazon-sqs-actor-system")
 
@@ -52,4 +54,4 @@ trait JsonToStringProcessor extends JsonProcessor[String] with Exit {
     println(result)
     result
   }
-}
+}*/

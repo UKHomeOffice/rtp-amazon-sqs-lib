@@ -2,6 +2,7 @@ package uk.gov.homeoffice.amazon.sqs
 
 import com.amazonaws.services.sqs.model.Message
 import org.specs2.mutable.Specification
+import uk.gov.homeoffice.amazon.sqs.subscription.Subscriber
 
 class PublisherSpec extends Specification {
   "Publisher" should {

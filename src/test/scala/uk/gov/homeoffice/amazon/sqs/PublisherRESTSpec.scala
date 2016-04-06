@@ -8,6 +8,7 @@ import org.json4s.jackson.JsonMethods._
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
+import uk.gov.homeoffice.amazon.sqs.subscription.Subscriber
 
 class PublisherRESTSpec(implicit ev: ExecutionEnv) extends Specification {
   "Restful client" should {

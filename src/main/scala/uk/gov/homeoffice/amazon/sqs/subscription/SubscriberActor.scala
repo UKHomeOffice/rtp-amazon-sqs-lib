@@ -17,15 +17,20 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
   val publisher = new Publisher(queue)(sqsClient)
 
   /**
-    * Override this for custom publication of an error upon invalid processing of a message from the message queue.
-    * By default, error publication will publish a given exception as JSON along with the original message
+    * Default functionality of publishing an error.
     */
-  val publishError: PartialFunction[(Throwable, Message), Any] = { case (throwable, message) =>
+  private val defaultPublishError: PartialFunction[(Throwable, Message), Any] = { case (throwable, message) =>
     publisher publishError compact(render(
       ("error-message" -> asJson(throwable)) ~
       ("original-message" -> message.toString)
     ))
   }
+
+  /**
+    * Override this for custom publication of an error upon invalid processing of a message from the message queue.
+    * By default, error publication will publish a given exception as JSON along with the original message.
+    */
+  val publishError: PartialFunction[(Throwable, Message), Any] = defaultPublishError
 
   /**
     * Implement your functionality i.e. process a received Message
@@ -77,7 +82,7 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
     * @param message Message the message that could not be processed
     */
   final def publishError(t: Throwable, message: Message): Any = {
-    (publishError orElse publishError)(t -> message)
+    (publishError orElse defaultPublishError)(t -> message)
     delete(message)
   }
 }

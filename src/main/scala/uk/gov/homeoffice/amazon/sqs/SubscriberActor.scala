@@ -7,6 +7,8 @@ import com.amazonaws.services.sqs.model.Message
 import org.scalactic.ErrorMessage
 import grizzled.slf4j.Logging
 import uk.gov.homeoffice.amazon.sqs.message.MessageProcessor
+import org.json4s.JsonDSL._
+import org.json4s.jackson.JsonMethods._
 
 class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation with Logging {
   this: MessageProcessor[_] =>
@@ -43,7 +45,11 @@ class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation w
 
   /** Override this method for custom publication of error messages to the error message queue e.g. maybe error should not be published */
   def publishErrorMessage(e: ErrorMessage, m: Message) = {
-    publisher.publishError(e)
+    publisher publishError pretty(render(
+      ("error-message" -> e) ~
+      ("original-message" -> m.toString)
+    ))
+
     deleteMessage(m)
   }
 }

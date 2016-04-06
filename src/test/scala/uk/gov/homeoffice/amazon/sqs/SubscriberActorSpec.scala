@@ -11,8 +11,9 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
 import uk.gov.homeoffice.amazon.sqs.message.MessageProcessor
+import uk.gov.homeoffice.json.JsonFormats
 
-class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
+class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats {
   def promised[R](result: Promise[R], processed: R) = {
     result.success(processed)
     processed
@@ -53,7 +54,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification {
       val errorSubscriber = new Subscriber(queue)
 
       errorSubscriber.receiveErrors must beLike {
-        case Seq(m: Message) => m.getBody mustEqual input
+        case Seq(m: Message) => (parse(m.getBody) \ "error-message").extract[String] mustEqual input
       }
     }
 

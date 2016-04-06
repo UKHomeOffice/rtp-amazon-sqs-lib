@@ -5,10 +5,10 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 import akka.actor.Actor
 import com.amazonaws.services.sqs.model.Message
+import org.json4s.JsonDSL._
+import org.json4s.jackson.JsonMethods._
 import grizzled.slf4j.Logging
 import uk.gov.homeoffice.amazon.sqs._
-import org.json4s.jackson.JsonMethods._
-import org.json4s.JsonDSL._
 import uk.gov.homeoffice.json.Json
 
 abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation with Json with Logging {
@@ -49,7 +49,7 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
   final def receive: Receive = {
     case Subscribe =>
       subscriber.receive match {
-        case Nil => context.system.scheduler.scheduleOnce(10 seconds, self, Subscribe)
+        case Nil => context.system.scheduler.scheduleOnce(10 seconds, self, Subscribe) // TODO 10 seconds to be configurable
         case messages => messages foreach { self ! _ }
       }
 

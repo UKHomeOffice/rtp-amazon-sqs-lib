@@ -1,6 +1,7 @@
-package uk.gov.homeoffice.amazon.sqs
+package uk.gov.homeoffice.amazon.sqs.subscription
 
 import scala.concurrent.Promise
+import scala.concurrent.duration._
 import scala.util.{Success, Try}
 import akka.actor.Props
 import akka.testkit.TestActorRef
@@ -10,13 +11,11 @@ import org.json4s.JsonAST.JObject
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import org.scalactic.{ErrorMessage, Good, Or}
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
-import uk.gov.homeoffice.amazon.sqs.message.JsonProcessor
-import uk.gov.homeoffice.amazon.sqs.subscription.{JsonSubscriberActor, StringSubscriberActor, Subscriber, SubscriberActor}
-import uk.gov.homeoffice.json.{EmptyJsonSchema, JsonFormats, JsonSchema}
+import uk.gov.homeoffice.amazon.sqs.{EmbeddedSQSServer, Publisher, Queue, REST}
+import uk.gov.homeoffice.json.{JsonFormats, JsonSchema}
 import uk.gov.homeoffice.process.Processor
 
 class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats {
@@ -81,97 +80,67 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
   }
 
   "JSON subscriber actor" should {
+    "receive valid JSON and process it" in new ActorSystemContext with EmbeddedSQSServer {
+      val input = JObject("input" -> JString("blah"))
+      val result = Promise[Try[String]]()
 
-  }
-}
-
-/*
-  "Subscriber (test) actor" should {
-    "receive JSON and fail to validate" in new ActorSystemContext with EmbeddedSQSServer {
-    }
-
-    "receive valid JSON" in new ActorSystemContext with EmbeddedSQSServer {
-    }
-  }
-
-  "Subscriber actor" should {
-    "receive JSON and fail to validate" in new ActorSystemContext with EmbeddedSQSServer {
-      val input = JObject("input" -> JInt(0))
-      val result = Promise[String Or ErrorMessage]()
+      trait JsonToStringProcessor extends Processor[JValue, String] {
+        override def process(in: JValue): Try[String] = promised(result, Success("Well done!"))
+      }
 
       val queue = create(new Queue("test-queue"))
 
-      val publisher = new Publisher(queue)
-
       system actorOf Props {
-        new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor {
-          def process(json: JValue) = promised(result, Good("Well Done!")).badMap(_ => new Exception).toTry
-        }
+        new JsonSubscriberActor(new Subscriber(queue), jsonSchema) with JsonToStringProcessor
       }
 
+      val publisher = new Publisher(queue)
+      publisher publish compact(render(input))
+
+      result.future must beEqualTo(Success("Well done!")).await
+    }
+
+    "receive JSON and fail to validate" in new ActorSystemContext with EmbeddedSQSServer {
+      val input = JObject("input" -> JInt(0))
+      val result = Promise[Try[String]]()
+
+      trait JsonToStringProcessor extends Processor[JValue, String] {
+        override def process(in: JValue): Try[String] = throw new Exception("Should not happen")
+      }
+
+      val queue = create(new Queue("test-queue"))
+
+      system actorOf Props {
+        new JsonSubscriberActor(new Subscriber(queue), jsonSchema) with JsonToStringProcessor
+      }
+
+      val publisher = new Publisher(queue)
       publisher publish compact(render(input))
 
       val errorSubscriber = new Subscriber(queue)
 
       eventually {
         errorSubscriber.receiveErrors must beLike {
-          case Seq(m: Message) => m.getBody must contain("error: instance type (integer) does not match any allowed primitive type")
+          case Seq(m: Message) =>
+            val `error-message` = parse(m.getBody) \ "error-message"
+
+            `error-message` \ "json" mustEqual input
+            (`error-message` \ "error").extract[String] must contain("error: instance type (integer) does not match any allowed primitive type")
         }
       }
     }
 
-    "receive valid JSON" in new ActorSystemContext with EmbeddedSQSServer {
+    "receive valid JSON from a RESTful POST and process it" in new ActorSystemContext with EmbeddedSQSServer with REST {
       val input = JObject("input" -> JString("blah"))
-      val result = Promise[String Or ErrorMessage]()
+      val result = Promise[Try[String]]()
 
-      val queue = create(new Queue("test-queue"))
-
-      val publisher = new Publisher(queue)
-
-      system actorOf Props {
-        new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor {
-          def process(json: JValue) = promised(result, Good("Well Done!")).badMap(_ => new Exception).toTry
+      trait JsonToStringProcessor extends Processor[JValue, String] {
+        override def process(in: JValue): Try[String] = {
+          promised(result, Success("Well done!"))
         }
       }
 
-      publisher publish compact(render(input))
-
-      result.future must beEqualTo(Good("Well Done!")).await
-    }
-
-    "receive valid JSON from a RESTful POST" in new ActorSystemContext with EmbeddedSQSServer with REST {
-      val input = JObject("input" -> JString("blah"))
-      val result = Promise[String Or ErrorMessage]()
-
       val queue = create(new Queue("test-queue"))
-
-      system actorOf Props {
-        new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor {
-          def process(json: JValue) = promised(result, Good("Well Done!")).badMap(_ => new Exception).toTry
-        }
-      }
-
-      val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
-                           .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
-                           .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(input)))) map { response =>
-        response.status
-      }
-
-      response must beEqualTo(OK).await
-      result.future must beEqualTo(Good("Well Done!")).await
-    }
-
-    "receive invalid JSON from a RESTful POST" in new ActorSystemContext with EmbeddedSQSServer with REST {
-      val input = JObject("input" -> JInt(0))
-      val result = Promise[String Or ErrorMessage]()
-
-      val queue = create(new Queue("test-queue"))
-
-      system actorOf Props {
-        new SubscriberActor(new Subscriber(queue)) with JsonToStringProcessor {
-          def process(json: JValue) = promised(result, Good("Well Done!")).badMap(_ => new Exception).toTry
-        }
-      }
 
       val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
                              .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
@@ -181,13 +150,46 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       response must beEqualTo(OK).await
 
+      system actorOf Props {
+        new JsonSubscriberActor(new Subscriber(queue), jsonSchema) with JsonToStringProcessor
+      }
+
+      result.future must beEqualTo(Success("Well done!")).awaitFor(3 seconds)
+    }
+
+    "receive invalid JSON from a RESTful POST" in new ActorSystemContext with EmbeddedSQSServer with REST {
+      val input = JObject("input" -> JInt(0))
+      val result = Promise[Try[String]]()
+
+      trait JsonToStringProcessor extends Processor[JValue, String] {
+        override def process(in: JValue): Try[String] = throw new Exception("Should not happen")
+      }
+
+      val queue = create(new Queue("test-queue"))
+
+      val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
+                             .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
+                             .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(input)))) map { response =>
+        response.status
+      }
+
+      response must beEqualTo(OK).await
+
+      system actorOf Props {
+        new JsonSubscriberActor(new Subscriber(queue), jsonSchema) with JsonToStringProcessor
+      }
+
       val errorSubscriber = new Subscriber(queue)
 
       eventually {
         errorSubscriber.receiveErrors must beLike {
-          case Seq(m: Message) => m.getBody must contain("error: instance type (integer) does not match any allowed primitive type")
+          case Seq(m: Message) =>
+            val `error-message` = parse(m.getBody) \ "error-message"
+
+            `error-message` \ "json" mustEqual input
+            (`error-message` \ "error").extract[String] must contain("error: instance type (integer) does not match any allowed primitive type")
         }
       }
     }
   }
-}*/
+}

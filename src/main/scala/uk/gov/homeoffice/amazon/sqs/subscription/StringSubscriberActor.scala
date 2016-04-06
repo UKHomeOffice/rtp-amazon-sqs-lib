@@ -1,4 +1,5 @@
 package uk.gov.homeoffice.amazon.sqs.subscription
+
 import scala.util.Try
 import com.amazonaws.services.sqs.model.Message
 import uk.gov.homeoffice.process.Processor

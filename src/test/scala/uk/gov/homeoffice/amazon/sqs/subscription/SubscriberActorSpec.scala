@@ -1,4 +1,4 @@
-package uk.gov.homeoffice.amazon.sqs
+package uk.gov.homeoffice.amazon.sqs.subscription
 
 import scala.concurrent.Promise
 import scala.util.{Failure, Success, Try}
@@ -8,7 +8,7 @@ import org.json4s.jackson.JsonMethods._
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
-import uk.gov.homeoffice.amazon.sqs.subscription.{Subscriber, SubscriberActor}
+import uk.gov.homeoffice.amazon.sqs.{EmbeddedSQSServer, Queue}
 import uk.gov.homeoffice.json.JsonFormats
 
 class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats {

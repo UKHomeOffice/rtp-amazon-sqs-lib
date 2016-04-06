@@ -15,7 +15,7 @@ import uk.gov.homeoffice.json.JsonFormats
 
 class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats {
   def promised[R](result: Promise[R], processed: R) = {
-    result.success(processed)
+    result success processed
     processed
   }
 

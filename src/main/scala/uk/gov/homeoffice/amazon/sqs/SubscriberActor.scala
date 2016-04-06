@@ -4,13 +4,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import akka.actor.Actor
 import com.amazonaws.services.sqs.model.Message
+import org.json4s.JsonAST.JString
+import org.json4s.JsonDSL._
+import org.json4s.jackson.JsonMethods._
 import org.scalactic.ErrorMessage
 import grizzled.slf4j.Logging
 import uk.gov.homeoffice.amazon.sqs.message.MessageProcessor
-import org.json4s.JsonDSL._
-import org.json4s.jackson.JsonMethods._
+import uk.gov.homeoffice.json.Json
 
-class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation with Logging {
+class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation with Json with Logging {
   this: MessageProcessor[_] =>
 
   implicit val sqsClient = subscriber.sqsClient
@@ -55,7 +57,7 @@ class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation w
     */
   def publishErrorMessage(e: ErrorMessage, m: Message) = {
     publisher publishError compact(render(
-      ("error-message" -> e) ~
+      ("error-message" -> toJson(e).getOrElse(JString(e))) ~
       ("original-message" -> m.toString)
     ))
 

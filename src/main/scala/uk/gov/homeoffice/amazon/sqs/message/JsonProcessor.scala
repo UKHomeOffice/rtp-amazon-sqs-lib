@@ -35,5 +35,5 @@ trait JsonProcessor[R] extends MessageProcessor[R] {
     case t: Throwable => Failure(new Exception(pretty(render(JsonError(error = Some("Invalid JSON format"), throwable = Some(t)).toJson))))
   }
 
-  def toException(jsonError: JsonError): Exception = new Exception(pretty(render(jsonError.toJson)))
+  def toException(jsonError: JsonError): Exception = new Exception(compact(render(jsonError.toJson)))
 }

@@ -29,6 +29,8 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
   /**
     * Override this for custom publication of an error upon invalid processing of a message from the message queue.
     * By default, error publication will publish a given exception as JSON along with the original message.
+    * Note that being a partial function, if your override is not actually run, then defaultPublishError will be.
+    * Your override could of course match on everything (case _ =>) whereby you can decide not to publish errors.
     */
   val publishError: PartialFunction[(Throwable, Message), Any] = defaultPublishError
 

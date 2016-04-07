@@ -18,6 +18,13 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
 
   /**
     * Default functionality of publishing an error.
+    * An error is published as JSON with the format:
+    * <pre>
+    *   {
+    *     "error-message":    { ... },
+    *     "original-message": { ... }
+    *   }
+    * </pre>
     */
   private val defaultPublishError: PartialFunction[(Throwable, Message), Any] = { case (throwable, message) =>
     publisher publishError compact(render(

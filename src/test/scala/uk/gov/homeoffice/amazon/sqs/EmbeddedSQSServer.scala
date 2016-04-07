@@ -8,6 +8,7 @@ import org.elasticmq.rest.sqs.SQSRestServerBuilder
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.matcher.Scope
 import de.flapdoodle.embed.process.runtime.Network._
+import uk.gov.homeoffice.amazon.sqs.subscription.Subscriber
 import uk.gov.homeoffice.specs2.ComposableAround
 
 trait EmbeddedSQSServer extends SQSServer with QueueCreation with Scope with ComposableAround {

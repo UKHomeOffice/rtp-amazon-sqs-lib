@@ -77,6 +77,7 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
         delete(message)
       } recoverWith {
         case t: Throwable =>
+          debug(s"Failed to process message: $message")
           publishError(t, message)
           Failure(t)
       }

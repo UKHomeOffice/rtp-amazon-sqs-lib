@@ -27,6 +27,8 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
     * </pre>
     */
   private val defaultPublishError: PartialFunction[(Throwable, Message), Any] = { case (throwable, message) =>
+    debug(s"Publishing error ${throwable.getMessage}")
+
     publisher publishError compact(render(
       ("error-message" -> asJson(throwable)) ~
       ("original-message" -> message.toString)
@@ -68,7 +70,12 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
       }
 
     case message: Message =>
-      process(message) map { _ => delete(message) } recoverWith {
+      debug(s"Received message: $message")
+
+      process(message) map { _ =>
+        debug(s"Processed message: $message")
+        delete(message)
+      } recoverWith {
         case t: Throwable =>
           publishError(t, message)
           Failure(t)

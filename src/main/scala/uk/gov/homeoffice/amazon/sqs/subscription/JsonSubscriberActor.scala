@@ -13,6 +13,8 @@ class JsonSubscriberActor(subscriber: Subscriber, jsonSchema: JsonSchema) extend
 
   override val publishError: PartialFunction[(Throwable, Message), Any] = {
     case (JsonErrorException(jsonError), message) =>
+      debug(s"Publishing error ${jsonError.error}")
+
       publisher publishError compact(render(
         ("error-message" -> jsonError.toJson) ~
         ("original-message" -> message.toString)

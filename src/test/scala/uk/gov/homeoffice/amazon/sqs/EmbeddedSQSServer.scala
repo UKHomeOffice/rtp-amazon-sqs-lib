@@ -31,8 +31,10 @@ trait EmbeddedSQSServer extends SQSServer with QueueCreation with Scope with Com
 
     try {
       server.waitUntilStarted()
+      info(s"Started SQS $sqsHost")
       super.around(r)
     } finally {
+      info(s"Stopping SQS $sqsHost")
       server.stopAndWait()
     }
   }

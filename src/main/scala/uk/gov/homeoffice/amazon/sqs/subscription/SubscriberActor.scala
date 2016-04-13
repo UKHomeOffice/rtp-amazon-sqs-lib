@@ -4,13 +4,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 import akka.actor.Actor
-import com.amazonaws.services.sqs.model.Message
+import com.amazonaws.services.sqs.model.{Message => SQSMessage}
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
 import grizzled.slf4j.Logging
 import uk.gov.homeoffice.amazon.sqs._
 import uk.gov.homeoffice.json.Json
 
+/**
+  * Subscribe to SQS messages
+  * @param subscriber Amazon SQS subscriber which wraps connection functionality to an instance of SQS
+  */
 abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation with Json with Logging {
   implicit val sqsClient = subscriber.sqsClient
   val queue = subscriber.queue
@@ -30,7 +34,7 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
     debug(s"Publishing error ${throwable.getMessage}")
 
     publisher publishError compact(render(
-      ("error-message" -> asJson(throwable)) ~
+      ("error-message" -> toJson(throwable)) ~
       ("original-message" -> message.toString)
     ))
   }
@@ -69,6 +73,9 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
         case messages => messages foreach { self ! _ }
       }
 
+    case sqsMessage: SQSMessage =>
+      self ! new Message(sqsMessage)
+
     case message: Message =>
       debug(s"Received message: $message")
 
@@ -90,8 +97,9 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
 
   /**
     * Override this method for custom deletion of messages from the message queue, or even to not delete a message.
+    * @param message Message to delete
     */
-  def delete(m: Message) = sqsClient.deleteMessage(queueUrl(queue.queueName), m.getReceiptHandle)
+  def delete(message: Message) = sqsClient.deleteMessage(queueUrl(queue.queueName), message.sqsMessage.getReceiptHandle)
 
   /**
     * By default, error publication will publish a given exception as JSON along with the original message.

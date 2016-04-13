@@ -7,9 +7,8 @@ import com.amazonaws.auth.BasicAWSCredentials
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import uk.gov.homeoffice.amazon.sqs.subscription.{JsonSubscriberActor, Subscriber}
+import uk.gov.homeoffice.amazon.sqs.subscription.{JsonSubscription, Subscriber, SubscriberActor}
 import uk.gov.homeoffice.json.JsonSchema
-import uk.gov.homeoffice.process.Processor
 import uk.gov.homeoffice.system.Exit
 
 /**
@@ -32,14 +31,19 @@ object ExampleBoot extends App {
   val queue = new Queue("test-queue")
 
   system actorOf Props {
-    new JsonSubscriberActor(new Subscriber(queue), ExampleJsonSchema.schema) with JsonToStringProcessor
+    new SubscriberActor(new Subscriber(queue)) with ExampleSubscription
   }
 
   new Publisher(queue) publish compact(render("input" -> "blah"))
 }
 
-object ExampleJsonSchema {
-  val schema = JsonSchema(
+/**
+  * Example of processing JSON subscription.
+  */
+trait ExampleSubscription extends JsonSubscription with Exit {
+  this: SubscriberActor =>
+
+  val jsonSchema = JsonSchema(
     ("id" -> "http://www.bad.com/schema") ~
       ("$schema" -> "http://json-schema.org/draft-04/schema") ~
       ("type" -> "object") ~
@@ -47,9 +51,7 @@ object ExampleJsonSchema {
         ("input" ->
           ("type" -> "string")))
   )
-}
 
-trait JsonToStringProcessor extends Processor[JValue, String] with Exit {
   def process(json: JValue) = exitAfter {
     val result = Success("Well Done!")
     println(result)

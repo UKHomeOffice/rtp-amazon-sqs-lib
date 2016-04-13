@@ -135,13 +135,24 @@ object ExampleBoot extends App {
   val queue = new Queue("test-queue")
 
   system actorOf Props {
-    new JsonSubscriberActor(new Subscriber(queue), EmptyJsonSchema) with JsonToStringProcessor
+    new SubscriberActor(new Subscriber(queue)) with ExampleSubscription
   }
 
   new Publisher(queue) publish compact(render("input" -> "blah"))
 }
 
-trait JsonToStringProcessor extends Processor[JValue, String] with Exit {
+trait ExampleSubscription extends JsonSubscription with Exit {
+  this: SubscriberActor =>
+
+  val jsonSchema = JsonSchema(
+    ("id" -> "http://www.bad.com/schema") ~
+      ("$schema" -> "http://json-schema.org/draft-04/schema") ~
+      ("type" -> "object") ~
+      ("properties" ->
+        ("input" ->
+          ("type" -> "string")))
+  )
+
   def process(json: JValue) = exitAfter {
     val result = Success("Well Done!")
     println(result)

@@ -3,7 +3,6 @@ package uk.gov.homeoffice.amazon.sqs
 import java.net.URL
 import java.util.UUID
 import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.services.sqs.model.Message
 import org.elasticmq.rest.sqs.SQSRestServerBuilder
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.matcher.Scope
@@ -13,6 +12,8 @@ import uk.gov.homeoffice.specs2.ComposableAround
 
 trait EmbeddedSQSServer extends SQSServer with QueueCreation with Scope with ComposableAround {
   val sqsHost = new URL(s"http://localhost:$getFreeServerPort")
+
+  val server = SQSRestServerBuilder.withInterface(sqsHost.getHost).withPort(sqsHost.getPort).start()
 
   implicit val sqsClient = new SQSClient(sqsHost, new BasicAWSCredentials("x", "x"))
 
@@ -27,8 +28,6 @@ trait EmbeddedSQSServer extends SQSServer with QueueCreation with Scope with Com
     }
 
   override def around[R: AsResult](r: => R): Result = {
-    val server = SQSRestServerBuilder.withInterface(sqsHost.getHost).withPort(sqsHost.getPort).start()
-
     try {
       server.waitUntilStarted()
       info(s"Started SQS $sqsHost")

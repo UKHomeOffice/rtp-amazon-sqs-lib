@@ -1,6 +1,5 @@
 package uk.gov.homeoffice.amazon.sqs
 
-import com.amazonaws.services.sqs.model.Message
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.amazon.sqs.subscription.Subscriber
 
@@ -15,7 +14,7 @@ class PublisherSpec extends Specification {
       val subscriber = new Subscriber(queue)
 
       subscriber.receive must beLike {
-        case Seq(m: Message) => m.getBody mustEqual "Testing 1, 2, 3"
+        case Seq(m: Message) => m.content mustEqual "Testing 1, 2, 3"
       }
     }
   }

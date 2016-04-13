@@ -2,7 +2,6 @@ package uk.gov.homeoffice.amazon.sqs
 
 import scala.xml.Elem
 import play.api.http.Status.OK
-import com.amazonaws.services.sqs.model.Message
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
 import org.specs2.concurrent.ExecutionEnv
@@ -29,7 +28,7 @@ class PublisherRESTSpec(implicit ev: ExecutionEnv) extends Specification {
           val subscriber = new Subscriber(queue)
 
           subscriber.receive must beLike {
-            case Seq(m: Message) => m.getBody mustEqual "Testing 1, 2, 3"
+            case Seq(m: Message) => m.content mustEqual "Testing 1, 2, 3"
           }
       }.await
     }
@@ -55,7 +54,7 @@ class PublisherRESTSpec(implicit ev: ExecutionEnv) extends Specification {
           val subscriber = new Subscriber(queue)
 
           subscriber.receive must beLike {
-            case Seq(m: Message) => parse(m.getBody) mustEqual json
+            case Seq(m: Message) => parse(m.content) mustEqual json
           }
       }.await
     }

@@ -1,5 +1,6 @@
 package uk.gov.homeoffice.amazon.sqs.subscription
 
+/*
 import scala.util.Try
 import com.amazonaws.services.sqs.model.Message
 import org.json4s.JValue
@@ -30,4 +31,4 @@ class JsonSubscriberActor(subscriber: Subscriber, jsonSchema: JsonSchema) extend
       processedJson <- process(json)
     } yield processedJson
   }
-}
+}*/

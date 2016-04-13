@@ -1,6 +1,5 @@
 package uk.gov.homeoffice.amazon.sqs.subscription
 
-import scala.concurrent.duration._
 import scala.concurrent.Promise
 import scala.concurrent.duration._
 import scala.util.{Success, Try}
@@ -15,7 +14,6 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
 import uk.gov.homeoffice.amazon.sqs._
-import uk.gov.homeoffice.amazon.sqs.json._
 import uk.gov.homeoffice.json._
 
 class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats {
@@ -105,10 +103,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = {
-            println(s"===> GOT JSON $json")
-            promised(result, Success("Well done!"))
-          }
+          def process(json: JValue) = promised(result, Success("Well done!"))
         }
       }
 
@@ -143,58 +138,44 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
         }
       }
     }
-  }
-}
 
-/*
-
-    "receive valid JSON from a RESTful POST and process it" in new ActorSystemContext with EmbeddedSQSServer with REST {
+    "receive valid JSON from a RESTful POST and process it" in new Context with REST {
       val input = JObject("input" -> JString("blah"))
       val result = Promise[Try[String]]()
 
-      trait JsonToStringProcessor extends Processor[JValue, String] {
-        override def process(in: JValue): Try[String] = {
-          promised(result, Success("Well done!"))
-        }
-      }
-
-      val queue = create(new Queue("test-queue"))
-
       val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
-                             .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
-                             .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(input)))) map { response =>
+        .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
+        .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(input)))) map { response =>
         response.status
       }
 
       response must beEqualTo(OK).await
 
       system actorOf Props {
-        new JsonSubscriberActor(new Subscriber(queue), jsonSchema) with JsonToStringProcessor
+        new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
+          def process(json: JValue) = promised(result, Success("Well done!"))
+        }
       }
 
       result.future must beEqualTo(Success("Well done!")).awaitFor(3 seconds)
     }
 
-    "receive invalid JSON from a RESTful POST" in new ActorSystemContext with EmbeddedSQSServer with REST {
+    "receive invalid JSON from a RESTful POST" in new Context with REST {
       val input = JObject("input" -> JInt(0))
       val result = Promise[Try[String]]()
 
-      trait JsonToStringProcessor extends Processor[JValue, String] {
-        override def process(in: JValue): Try[String] = throw new Exception("Should not happen")
-      }
-
-      val queue = create(new Queue("test-queue"))
-
       val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
-                             .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
-                             .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(input)))) map { response =>
+        .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
+        .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(input)))) map { response =>
         response.status
       }
 
       response must beEqualTo(OK).await
 
       system actorOf Props {
-        new JsonSubscriberActor(new Subscriber(queue), jsonSchema) with JsonToStringProcessor
+        new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
+          def process(json: JValue) = throw new Exception("Should not process as JSON should have failed schema validation")
+        }
       }
 
       val errorSubscriber = new Subscriber(queue)
@@ -202,7 +183,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
       eventually {
         errorSubscriber.receiveErrors must beLike {
           case Seq(m: Message) =>
-            val `error-message` = parse(m.getBody) \ "error-message"
+            val `error-message` = parse(m.content) \ "error-message"
 
             `error-message` \ "json" mustEqual input
             (`error-message` \ "error").extract[String] must contain("error: instance type (integer) does not match any allowed primitive type")
@@ -210,4 +191,4 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
       }
     }
   }
-}*/
+}

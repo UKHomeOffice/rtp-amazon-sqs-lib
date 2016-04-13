@@ -4,6 +4,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 import akka.actor.Actor
+import com.amazonaws.services.sqs.model.{Message => SQSMessage}
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
 import grizzled.slf4j.Logging
@@ -71,6 +72,9 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
         case Nil => context.system.scheduler.scheduleOnce(10 seconds, self, Subscribe) // TODO 10 seconds to be configurable
         case messages => messages foreach { self ! _ }
       }
+
+    case sqsMessage: SQSMessage =>
+      self ! new Message(sqsMessage)
 
     case message: Message =>
       debug(s"Received message: $message")

@@ -18,13 +18,6 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
       result success processed
       processed
     }
-
-    /*trait Blah {
-      this: SubscriberActor =>
-
-      //val process = (m: Message) => Success(m.content) //promised(result, Success(m.content))
-      def process(m: Message) = promised(result, Success(m.content))
-    }*/
   }
 
   "Subscriber actor" should {

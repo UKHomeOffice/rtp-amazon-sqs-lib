@@ -3,9 +3,9 @@ package uk.gov.homeoffice.amazon.sqs
 import com.amazonaws.services.sqs.model.{Message => SQSMessage}
 
 class Message(val sqsMessage: SQSMessage) {
-  val messageID = sqsMessage.getMessageId
+  val messageID: MessageID = sqsMessage.getMessageId
 
-  val content = sqsMessage.getBody
+  val content: String = sqsMessage.getBody
 
-  override def toString: MessageID = sqsMessage.toString
+  override def toString: String = sqsMessage.toString
 }

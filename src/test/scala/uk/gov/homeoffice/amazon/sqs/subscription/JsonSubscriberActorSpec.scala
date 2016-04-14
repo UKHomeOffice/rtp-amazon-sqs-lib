@@ -16,14 +16,9 @@ import uk.gov.homeoffice.akka.ActorSystemContext
 import uk.gov.homeoffice.amazon.sqs._
 import uk.gov.homeoffice.json._
 
-class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats {
+class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats with ResultPromise {
   trait Context extends ActorSystemContext with EmbeddedSQSServer {
     val queue = create(new Queue("test-queue"))
-
-    def promised[R](result: Promise[R], processed: R) = {
-      result success processed
-      processed
-    }
 
     trait MyJsonSubscription extends JsonSubscription {
       this: SubscriberActor =>
@@ -41,47 +36,43 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
   "JSON subscriber (test) actor" should {
     "receive any old JSON and process it" in new Context {
-      val input = JObject("input" -> JString("blah"))
       val result = Promise[Try[String]]()
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) with JsonSubscription {
           val jsonSchema = EmptyJsonSchema
 
-          def process(json: JValue) = promised(result, Success("Well done!"))
+          def process(json: JValue) = result success "Well done!"
         }
       }
 
-      actor.underlyingActor receive createMessage(compact(render(input)))
+      actor.underlyingActor receive createMessage(compact(render(JObject("input" -> JString("blah")))))
 
       result.future must beEqualTo(Success("Well done!")).await
     }
 
     "receive valid JSON and process it" in new Context {
-      val input = JObject("input" -> JString("blah"))
       val result = Promise[Try[String]]()
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = promised(result, Success("Well done!"))
+          def process(json: JValue) = result success "Well done!"
         }
       }
 
-      actor.underlyingActor receive createMessage(compact(render(input)))
+      actor.underlyingActor receive createMessage(compact(render(JObject("input" -> JString("blah")))))
 
       result.future must beEqualTo(Success("Well done!")).await
     }
 
     "receive JSON and fail to validate" in new Context {
-      val input = JObject("input" -> JInt(0))
-      val result = Promise[Try[String]]()
-
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
           def process(json: JValue) = throw new Exception("Should not process as JSON should have failed schema validation")
         }
       }
 
+      val input = JObject("input" -> JInt(0))
       actor.underlyingActor receive createMessage(compact(render(input)))
 
       val errorSubscriber = new Subscriber(queue)
@@ -98,25 +89,21 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
   "JSON subscriber actor" should {
     "receive valid JSON and process it" in new Context {
-      val input = JObject("input" -> JString("blah"))
       val result = Promise[Try[String]]()
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = promised(result, Success("Well done!"))
+          def process(json: JValue) = result success "Well done!"
         }
       }
 
       val publisher = new Publisher(queue)
-      publisher publish compact(render(input))
+      publisher publish compact(render(JObject("input" -> JString("blah"))))
 
       result.future must beEqualTo(Success("Well done!")).await
     }
 
     "receive JSON and fail to validate" in new Context {
-      val input = JObject("input" -> JInt(0))
-      val result = Promise[Try[String]]()
-
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
           def process(json: JValue) = throw new Exception("Should not process as JSON should have failed schema validation")
@@ -124,6 +111,8 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
       }
 
       val publisher = new Publisher(queue)
+
+      val input = JObject("input" -> JInt(0))
       publisher publish compact(render(input))
 
       val errorSubscriber = new Subscriber(queue)
@@ -140,12 +129,11 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
     }
 
     "receive valid JSON from a RESTful POST and process it" in new Context with REST {
-      val input = JObject("input" -> JString("blah"))
       val result = Promise[Try[String]]()
 
       val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
         .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
-        .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(input)))) map { response =>
+        .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(JObject("input" -> JString("blah")))))) map { response =>
         response.status
       }
 
@@ -153,7 +141,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = promised(result, Success("Well done!"))
+          def process(json: JValue) = result success "Well done!"
         }
       }
 
@@ -162,7 +150,6 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
     "receive invalid JSON from a RESTful POST" in new Context with REST {
       val input = JObject("input" -> JInt(0))
-      val result = Promise[Try[String]]()
 
       val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
         .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")

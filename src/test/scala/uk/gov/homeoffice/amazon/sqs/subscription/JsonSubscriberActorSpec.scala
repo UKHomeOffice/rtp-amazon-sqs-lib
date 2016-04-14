@@ -16,7 +16,7 @@ import uk.gov.homeoffice.akka.ActorSystemContext
 import uk.gov.homeoffice.amazon.sqs._
 import uk.gov.homeoffice.json._
 
-class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats with ResultPromise {
+class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats with PromiseOps {
   trait Context extends ActorSystemContext with EmbeddedSQSServer {
     val queue = create(new Queue("test-queue"))
 
@@ -42,7 +42,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
         new SubscriberActor(new Subscriber(queue)) with JsonSubscription {
           val jsonSchema = EmptyJsonSchema
 
-          def process(json: JValue) = result success "Well done!"
+          def process(json: JValue) = result done Success("Well done!")
         }
       }
 
@@ -56,7 +56,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = result success "Well done!"
+          def process(json: JValue) = result done Success("Well done!")
         }
       }
 
@@ -93,7 +93,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = result success "Well done!"
+          def process(json: JValue) = result done Success("Well done!")
         }
       }
 
@@ -141,7 +141,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = result success "Well done!"
+          def process(json: JValue) = result done Success("Well done!")
         }
       }
 

@@ -7,10 +7,10 @@ import org.json4s.jackson.JsonMethods._
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
-import uk.gov.homeoffice.amazon.sqs.{EmbeddedSQSServer, Message, Queue, ResultPromise}
+import uk.gov.homeoffice.amazon.sqs.{EmbeddedSQSServer, Message, PromiseOps, Queue}
 import uk.gov.homeoffice.json.JsonFormats
 
-class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats with ResultPromise {
+class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats with PromiseOps {
   trait Context extends ActorSystemContext with EmbeddedSQSServer {
     val queue = create(new Queue("test-queue"))
   }
@@ -21,7 +21,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) {
-          def process(m: Message) = result success m.content
+          def process(m: Message) = result done Success(m.content)
         }
       }
 
@@ -36,7 +36,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) {
-          def process(m: Message) = result failed new Exception(m.content)
+          def process(m: Message) = result done Failure(new Exception(m.content))
         }
       }
 

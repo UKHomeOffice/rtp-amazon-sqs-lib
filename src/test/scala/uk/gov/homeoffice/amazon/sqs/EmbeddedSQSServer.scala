@@ -13,7 +13,7 @@ import uk.gov.homeoffice.specs2.ComposableAround
 trait EmbeddedSQSServer extends SQSServer with QueueCreation with Scope with ComposableAround {
   val sqsHost = new URL(s"http://localhost:$getFreeServerPort")
 
-  val server = SQSRestServerBuilder.withInterface(sqsHost.getHost).withPort(sqsHost.getPort).start()
+  val server = SQSRestServerBuilder withInterface sqsHost.getHost withPort sqsHost.getPort start()
 
   implicit val sqsClient = new SQSClient(sqsHost, new BasicAWSCredentials("x", "x"))
 

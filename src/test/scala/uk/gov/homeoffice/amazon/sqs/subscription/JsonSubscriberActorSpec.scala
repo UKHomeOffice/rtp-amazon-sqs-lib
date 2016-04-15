@@ -14,6 +14,7 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
 import uk.gov.homeoffice.amazon.sqs._
+import uk.gov.homeoffice.concurrent.PromiseOps
 import uk.gov.homeoffice.json._
 
 class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats with PromiseOps {

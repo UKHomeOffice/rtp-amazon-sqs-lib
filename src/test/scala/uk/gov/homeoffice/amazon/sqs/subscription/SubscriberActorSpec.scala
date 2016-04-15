@@ -7,7 +7,8 @@ import org.json4s.jackson.JsonMethods._
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
-import uk.gov.homeoffice.amazon.sqs.{EmbeddedSQSServer, Message, PromiseOps, Queue}
+import uk.gov.homeoffice.amazon.sqs.{EmbeddedSQSServer, Message, Queue}
+import uk.gov.homeoffice.concurrent.PromiseOps
 import uk.gov.homeoffice.json.JsonFormats
 
 class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats with PromiseOps {

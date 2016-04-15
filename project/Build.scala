@@ -45,7 +45,7 @@ object Build extends Build {
       val `elasticmq-version` = "0.8.12"
       val `gatling-version` = "2.1.7"
       val `rtp-test-lib-version` = "1.2.3"
-      val `rtp-akka-lib-version` = "1.6.3"
+      val `rtp-akka-lib-version` = "1.6.4"
 
       Seq(
         "org.elasticmq" %% "elasticmq-core" % `elasticmq-version` withSources(),

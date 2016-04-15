@@ -42,7 +42,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
         new SubscriberActor(new Subscriber(queue)) with JsonSubscription {
           val jsonSchema = EmptyJsonSchema
 
-          def process(json: JValue) = result done Success("Well done!")
+          def process(json: JValue) = result <~ Success("Well done!")
         }
       }
 
@@ -56,7 +56,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = result done Success("Well done!")
+          def process(json: JValue) = result <~ Success("Well done!")
         }
       }
 
@@ -93,7 +93,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = result done Success("Well done!")
+          def process(json: JValue) = result <~ Success("Well done!")
         }
       }
 
@@ -141,7 +141,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = result done Success("Well done!")
+          def process(json: JValue) = result <~ Success("Well done!")
         }
       }
 

@@ -21,7 +21,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) {
-          def process(m: Message) = result done Success(m.content)
+          def process(m: Message) = result <~ Success(m.content)
         }
       }
 
@@ -36,7 +36,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) {
-          def process(m: Message) = result done Failure(new Exception(m.content))
+          def process(m: Message) = result <~ Failure(new Exception(m.content))
         }
       }
 

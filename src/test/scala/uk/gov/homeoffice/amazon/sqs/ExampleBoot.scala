@@ -7,7 +7,7 @@ import com.amazonaws.auth.BasicAWSCredentials
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import uk.gov.homeoffice.amazon.sqs.subscription.{JsonSubscription, Subscriber, SubscriberActor}
+//import uk.gov.homeoffice.amazon.sqs.subscription.{JsonSubscription, Subscriber, SubscriberActor}
 import uk.gov.homeoffice.json.JsonSchema
 import uk.gov.homeoffice.system.Exit
 
@@ -23,7 +23,7 @@ import uk.gov.homeoffice.system.Exit
   *    sbt test:run
   * </pre>
   */
-object ExampleBoot extends App {
+/*object ExampleBoot extends App {
   val system = ActorSystem("amazon-sqs-actor-system")
 
   implicit val sqsClient = new SQSClient(new URL("http://localhost:9324"), new BasicAWSCredentials("x", "x"))
@@ -35,11 +35,12 @@ object ExampleBoot extends App {
   }
 
   new Publisher(queue) publish compact(render("input" -> "blah"))
-}
+}*/
 
 /**
   * Example of processing JSON subscription.
   */
+/*
 trait ExampleSubscription extends JsonSubscription with Exit {
   this: SubscriberActor =>
 
@@ -57,4 +58,4 @@ trait ExampleSubscription extends JsonSubscription with Exit {
     println(result)
     result
   }
-}
+}*/

@@ -15,7 +15,6 @@ object Build extends Build {
     .settings(
       name := moduleName,
       organization := "uk.gov.homeoffice",
-      version := "1.0.0-SNAPSHOT",
       scalaVersion := "2.11.8",
       scalacOptions ++= Seq(
         "-feature",
@@ -45,7 +44,7 @@ object Build extends Build {
       val `elasticmq-version` = "0.8.12"
       val `gatling-version` = "2.1.7"
       val `rtp-test-lib-version` = "1.2.3"
-      val `rtp-akka-lib-version` = "1.6.5"
+      val `rtp-akka-lib-version` = "1.6.6-SNAPSHOT"
 
       Seq(
         "org.elasticmq" %% "elasticmq-core" % `elasticmq-version` withSources(),

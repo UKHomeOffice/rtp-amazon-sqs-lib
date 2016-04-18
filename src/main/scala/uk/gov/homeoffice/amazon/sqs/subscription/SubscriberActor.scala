@@ -1,58 +1,34 @@
 package uk.gov.homeoffice.amazon.sqs.subscription
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.util.{Failure, Try}
+import scala.util.Try
 import akka.actor.Actor
 import com.amazonaws.services.sqs.model.{Message => SQSMessage}
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
 import grizzled.slf4j.Logging
 import uk.gov.homeoffice.amazon.sqs._
+import uk.gov.homeoffice.amazon.sqs.subscription.Protocol.{Processed, ProcessingError}
 import uk.gov.homeoffice.json.Json
 
 /**
   * Subscribe to SQS messages
   * @param subscriber Amazon SQS subscriber which wraps connection functionality to an instance of SQS
   */
-abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation with Json with Logging {
+abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation with Json with Logging with AfterProcess {
   implicit val sqsClient = subscriber.sqsClient
   val queue = subscriber.queue
   val publisher = new Publisher(queue)(sqsClient)
 
   /**
-    * Default functionality of publishing an error.
-    * An error is published as JSON with the format:
-    * <pre>
-    *   {
-    *     "error-message":    { ... },
-    *     "original-message": { ... }
-    *   }
-    * </pre>
-    */
-  private val defaultPublishError: PartialFunction[(Throwable, Message), Any] = { case (throwable, message) =>
-    debug(s"Publishing error ${throwable.getMessage}")
-
-    publisher publishError compact(render(
-      ("error-message" -> toJson(throwable)) ~
-      ("original-message" -> message.toString)
-    ))
-  }
-
-  /**
-    * Override this for custom publication of an error upon invalid processing of a message from the message queue.
-    * By default, error publication will publish a given exception as JSON along with the original message.
-    * Note that being a partial function, if your override is not actually run, then defaultPublishError will be.
-    * Your override could of course match on everything (case _ =>) whereby you can decide not to publish errors.
-    */
-  val publishError: PartialFunction[(Throwable, Message), Any] = defaultPublishError
-
-  /**
     * Implement your functionality i.e. process a received Message
+    *
     * @param m Message
-    * @return Try of the outcome of processing the given Message
+    * @return Future The outcome of processing the given Message
     */
-  def process(m: Message): Try[_]
+  def process(m: Message): Future[_]
 
   /**
     * Upon instantiating this actor, create its associated queues and start subscribing
@@ -77,37 +53,76 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
       self ! new Message(sqsMessage)
 
     case message: Message =>
-      debug(s"Received message: $message")
-
-      process(message) map { _ =>
-        debug(s"Processed message: $message")
-        delete(message)
-      } recoverWith {
-        case t: Throwable =>
-          debug(s"Failed to process message: $message")
-          publishError(t, message)
-          Failure(t)
-      }
+      info(s"Received message: $message")
+      process(message) andThen afterProcess(message)
 
       self ! Subscribe
+
+    case Processed(message) =>
+      info(s"Processed message: $message")
+      delete(message)
+
+    case ProcessingError(throwable, message) =>
+      info(s"Failed to process message: $message")
+      publishError(throwable, message)
 
     case other =>
       error(s"""Received message that is "${`not-amazon-sqs-message`}" (must have been sent to this actor directly instead of coming from an Amazon SQS queue): $other""")
   }
 
   /**
-    * Override this method for custom deletion of messages from the message queue, or even to not delete a message.
-    * @param message Message to delete
+    * After processing does nothing unless you say so by mixing in an AfterProcess.
+    * @param message Message being processed.
+    * @tparam R The type of result from processing
+    * @return PartialFunction[Try[R], _]
     */
-  def delete(message: Message) = sqsClient.deleteMessage(queueUrl(queue.queueName), message.sqsMessage.getReceiptHandle)
+  override def afterProcess[R](message: Message): PartialFunction[Try[R], _] = {
+    case _ =>
+  }
+
+  /**
+    * Override this method for custom deletion of messages from the message queue, or even to not delete a message.
+    * NOTE That by default this method is not called unless you either:
+    * (i)   Use Akka messaging e.g. have your implenting actor of this class fire a Processed to itself, or have another actor fire said message to this actor.
+    * (ii)  Mixin an AfterProcess such as DefaultAfterProcess
+    * (iii) Call this method directly from your own process method.
+    *
+    * @param message Message to delete
+    * @return Message that was successfully deleted
+    */
+  def delete(message: Message): Message = {
+    sqsClient.deleteMessage(queueUrl(queue.queueName), message.sqsMessage.getReceiptHandle)
+    message
+  }
 
   /**
     * By default, error publication will publish a given exception as JSON along with the original message.
+    * Override this for custom publication of an error upon invalid processing of a message from the message queue.
+    * * NOTE That by default this method is not called unless you either:
+    * (i)   Use Akka messaging e.g. have your implenting actor of this class fire a ProcessingError to itself, or have another actor fire said message to this actor.
+    * (ii)  Mixin an AfterProcess such as DefaultAfterProcess
+    * (iii) Call this method directly from your own process method.
+    *
     * @param t Throwable that indicates what went wrong with processing a received message
     * @param message Message the message that could not be processed
+    * @return Message that could not be processed and has been successfully published as an error
+    *
+    * An error is published (by default) as JSON with the format:
+    * <pre>
+    *   {
+    *     "error-message":    { ... },
+    *     "original-message": { ... }
+    *   }
+    * </pre>
     */
-  final def publishError(t: Throwable, message: Message): Any = {
-    (publishError orElse defaultPublishError)(t -> message)
+  def publishError(t: Throwable, message: Message): Message = {
+    info(s"Publishing error ${t.getMessage}")
+
+    publisher publishError compact(render(
+      ("error-message" -> toJson(t)) ~
+      ("original-message" -> message.toString)
+    ))
+
     delete(message)
   }
 }

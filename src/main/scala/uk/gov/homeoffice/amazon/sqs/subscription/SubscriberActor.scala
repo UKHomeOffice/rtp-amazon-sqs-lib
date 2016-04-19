@@ -62,6 +62,7 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
 
     case Processed(message) =>
       info(s"Processed message: $message")
+      println(s"===> MY TEMP DEBUG: Received message processed for $message")
       delete(message)
 
     case ProcessingError(throwable, message) =>

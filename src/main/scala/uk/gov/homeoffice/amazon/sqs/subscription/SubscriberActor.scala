@@ -14,7 +14,9 @@ import uk.gov.homeoffice.amazon.sqs.subscription.Protocol.{Processed, Processing
 import uk.gov.homeoffice.json.Json
 
 /**
-  * Subscribe to SQS messages
+  * Subscribe to SQS messages.
+  * Process a message by implementing method "process".
+  * Then after processing a message, you may (should) perform "after processing" functionality such as deleting the processed message from the SQS queue and if necessary publishing any error to an associated error queue.
   * @param subscriber Amazon SQS subscriber which wraps connection functionality to an instance of SQS
   */
 abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation with Json with Logging with AfterProcess {
@@ -71,7 +73,7 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
   }
 
   /**
-    * After processing does nothing unless you say so by mixing in an AfterProcess.
+    * After processing does nothing unless you say so by mixing in an AfterProcess, or simply overriding this method.
     * @param message Message being processed.
     * @tparam R The type of result from processing
     * @return PartialFunction[Try[R], _]

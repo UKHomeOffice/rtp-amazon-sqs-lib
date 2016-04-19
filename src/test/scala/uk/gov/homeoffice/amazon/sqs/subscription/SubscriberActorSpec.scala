@@ -30,10 +30,9 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
         }
       }
 
-      val input = "blah"
-      actor.underlyingActor receive createMessage(input)
+      actor.underlyingActor receive createMessage("blah")
 
-      result.future must beEqualTo(input).await
+      result.future must beEqualTo("blah").await
     }
 
     "reject a string" in new Context {

@@ -1,9 +1,8 @@
 package uk.gov.homeoffice.amazon.sqs.subscription
 
-import java.util.concurrent.TimeUnit
-import scala.concurrent.{Future, Promise}
 import scala.concurrent.duration._
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.{Future, Promise}
+import scala.util.Try
 import akka.actor.Props
 import akka.testkit.TestActorRef
 import play.api.http.Status.OK
@@ -142,8 +141,8 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
       true must eventually(beEqualTo(publishedErrorMessage))
     }
 
-    /*"receive valid JSON from a RESTful POST and process it" in new Context with REST {
-      val result = Promise[Try[String]]()
+    "receive valid JSON from a RESTful POST and process it" in new Context with REST {
+      val result = Promise[String Or JsonError]()
 
       val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
         .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
@@ -155,14 +154,14 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = result <~ Success("Well done!")
+          def process(m: Message) = result <~ Future { parse(m, jsonSchema) map { _ => "Well done!"} }
         }
       }
 
-      result.future must beEqualTo(Success("Well done!")).awaitFor(3 seconds)
-    }*/
+      result.future must beEqualTo(Good("Well done!")).awaitFor(3 seconds)
+    }
 
-    /*"receive invalid JSON from a RESTful POST" in new Context with REST {
+    "receive invalid JSON from a RESTful POST" in new Context with REST {
       val input = JObject("input" -> JInt(0))
 
       val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
@@ -175,21 +174,22 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = throw new Exception("Should not process as JSON should have failed schema validation")
+          def process(m: Message) = Future {
+            parse(m, jsonSchema)
+          }
         }
       }
 
       val errorSubscriber = new Subscriber(queue)
 
-      eventually {
-        errorSubscriber.receiveErrors must beLike {
-          case Seq(m: Message) =>
-            val `error-message` = parse(m.content) \ "error-message"
+      def publishedErrorMessage: Boolean =  Try {
+        val `error-message` = parse(errorSubscriber.receiveErrors.head.content) \ "error-message"
 
-            `error-message` \ "json" mustEqual input
-            (`error-message` \ "error").extract[String] must contain("error: instance type (integer) does not match any allowed primitive type")
-        }
-      }
-    }*/
+        (`error-message` \ "json" == input) &&
+          (`error-message` \ "error").extract[String].contains("error: instance type (integer) does not match any allowed primitive type")
+      } getOrElse false
+
+      true must eventually(beEqualTo(publishedErrorMessage))
+    }
   }
 }

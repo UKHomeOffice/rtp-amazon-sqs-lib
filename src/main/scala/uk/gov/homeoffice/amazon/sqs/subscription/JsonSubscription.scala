@@ -35,6 +35,7 @@ trait JsonSubscription {
       ("original-message" -> message.toString)
     ))
 
+    delete(message)
     jsonError
   }
 }

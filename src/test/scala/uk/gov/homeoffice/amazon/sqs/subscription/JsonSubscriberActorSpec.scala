@@ -1,8 +1,8 @@
 package uk.gov.homeoffice.amazon.sqs.subscription
 
-import scala.concurrent.Promise
 import scala.concurrent.duration._
-import scala.util.{Success, Try}
+import scala.concurrent.{Future, Promise}
+import scala.util.Try
 import akka.actor.Props
 import akka.testkit.TestActorRef
 import play.api.http.Status.OK
@@ -10,6 +10,7 @@ import org.json4s.JsonAST.JObject
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import org.scalactic.{Bad, Good, Or}
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
@@ -37,39 +38,45 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
   "JSON subscriber (test) actor" should {
     "receive any old JSON and process it" in new Context {
-      val result = Promise[Try[String]]()
+      val result = Promise[String]()
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) with JsonSubscription {
-          val jsonSchema = EmptyJsonSchema
-
-          def process(json: JValue) = result <~ Success("Well done!")
+          def process(m: Message) = result <~ Future {
+            parse(m, EmptyJsonSchema)
+            "Well done!"
+          }
         }
       }
 
       actor.underlyingActor receive createMessage(compact(render(JObject("input" -> JString("blah")))))
 
-      result.future must beEqualTo(Success("Well done!")).await
+      result.future must beEqualTo("Well done!").await
     }
 
     "receive valid JSON and process it" in new Context {
-      val result = Promise[Try[String]]()
+      val result = Promise[String]()
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = result <~ Success("Well done!")
+          def process(m: Message) = result <~ Future {
+            parse(m, jsonSchema)
+            "Well done!"
+          }
         }
       }
 
       actor.underlyingActor receive createMessage(compact(render(JObject("input" -> JString("blah")))))
 
-      result.future must beEqualTo(Success("Well done!")).await
+      result.future must beEqualTo("Well done!").await
     }
 
     "receive JSON and fail to validate" in new Context {
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = throw new Exception("Should not process as JSON should have failed schema validation")
+          def process(m: Message) = Future {
+            parse(m, jsonSchema)
+          }
         }
       }
 
@@ -78,36 +85,38 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       val errorSubscriber = new Subscriber(queue)
 
-      errorSubscriber.receiveErrors must beLike {
-        case Seq(m: Message) =>
-          val `error-message` = parse(m.content) \ "error-message"
+      def publishedErrorMessage = Try {
+        (parse(errorSubscriber.receiveErrors.head.content) \ "error-message" \ "error").extract[String] contains "error: instance type (integer) does not match any allowed primitive type"
+      } getOrElse false
 
-          `error-message` \ "json" mustEqual input
-          (`error-message` \ "error").extract[String] must contain("error: instance type (integer) does not match any allowed primitive type")
-      }
+      true must eventually(beEqualTo(publishedErrorMessage))
     }
   }
 
   "JSON subscriber actor" should {
     "receive valid JSON and process it" in new Context {
-      val result = Promise[Try[String]]()
+      val result = Promise[String Or JsonError]()
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = result <~ Success("Well done!")
+          def process(m: Message) = result <~ Future {
+            parse(m, jsonSchema) map { _ => "Well done!" }
+          }
         }
       }
 
       val publisher = new Publisher(queue)
       publisher publish compact(render(JObject("input" -> JString("blah"))))
 
-      result.future must beEqualTo(Success("Well done!")).await
+      result.future must beEqualTo(Good("Well done!")).await
     }
 
     "receive JSON and fail to validate" in new Context {
+      val result = Promise[JValue Or JsonError]()
+
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = throw new Exception("Should not process as JSON should have failed schema validation")
+          def process(m: Message) = result <~ Future { parse(m, jsonSchema) }
         }
       }
 
@@ -116,21 +125,24 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
       val input = JObject("input" -> JInt(0))
       publisher publish compact(render(input))
 
+      result.future must beLike[JValue Or JsonError] {
+        case Bad(JsonError(_, Some(error), _)) => error must contain("error: instance type (integer) does not match any allowed primitive type")
+      }.await
+
       val errorSubscriber = new Subscriber(queue)
 
-      eventually {
-        errorSubscriber.receiveErrors must beLike {
-          case Seq(m: Message) =>
-            val `error-message` = parse(m.content) \ "error-message"
+      def publishedErrorMessage: Boolean =  Try {
+        val `error-message` = parse(errorSubscriber.receiveErrors.head.content) \ "error-message"
 
-            `error-message` \ "json" mustEqual input
-            (`error-message` \ "error").extract[String] must contain("error: instance type (integer) does not match any allowed primitive type")
-        }
-      }
+        (`error-message` \ "json" == input) &&
+        (`error-message` \ "error").extract[String].contains("error: instance type (integer) does not match any allowed primitive type")
+      } getOrElse false
+
+      true must eventually(beEqualTo(publishedErrorMessage))
     }
 
     "receive valid JSON from a RESTful POST and process it" in new Context with REST {
-      val result = Promise[Try[String]]()
+      val result = Promise[String Or JsonError]()
 
       val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
         .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
@@ -142,11 +154,11 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = result <~ Success("Well done!")
+          def process(m: Message) = result <~ Future { parse(m, jsonSchema) map { _ => "Well done!"} }
         }
       }
 
-      result.future must beEqualTo(Success("Well done!")).awaitFor(3 seconds)
+      result.future must beEqualTo(Good("Well done!")).awaitFor(3 seconds)
     }
 
     "receive invalid JSON from a RESTful POST" in new Context with REST {
@@ -162,21 +174,22 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(json: JValue) = throw new Exception("Should not process as JSON should have failed schema validation")
+          def process(m: Message) = Future {
+            parse(m, jsonSchema)
+          }
         }
       }
 
       val errorSubscriber = new Subscriber(queue)
 
-      eventually {
-        errorSubscriber.receiveErrors must beLike {
-          case Seq(m: Message) =>
-            val `error-message` = parse(m.content) \ "error-message"
+      def publishedErrorMessage: Boolean =  Try {
+        val `error-message` = parse(errorSubscriber.receiveErrors.head.content) \ "error-message"
 
-            `error-message` \ "json" mustEqual input
-            (`error-message` \ "error").extract[String] must contain("error: instance type (integer) does not match any allowed primitive type")
-        }
-      }
+        (`error-message` \ "json" == input) &&
+          (`error-message` \ "error").extract[String].contains("error: instance type (integer) does not match any allowed primitive type")
+      } getOrElse false
+
+      true must eventually(beEqualTo(publishedErrorMessage))
     }
   }
 }

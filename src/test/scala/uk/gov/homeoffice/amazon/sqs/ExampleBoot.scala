@@ -54,7 +54,6 @@ trait ExampleSubscription extends JsonSubscription with Exit {
 
   /**
     * Implement your functionality i.e. process a received Message
-    *
     * @param m Message
     * @return Future The outcome of processing the given Message
     */

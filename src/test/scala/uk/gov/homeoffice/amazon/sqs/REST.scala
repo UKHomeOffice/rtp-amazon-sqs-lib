@@ -5,6 +5,9 @@ import play.api.libs.ws.WSClient
 import play.api.libs.ws.ning.NingWSClient
 import uk.gov.homeoffice.akka.ActorSystemContext
 
+/**
+  * To interface with (embedded) SQS server via HTTP, utilising Play's Web Service Client.
+  */
 trait REST {
   this: ActorSystemContext with EmbeddedSQSServer =>
 

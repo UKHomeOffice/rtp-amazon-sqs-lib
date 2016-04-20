@@ -17,7 +17,6 @@ import uk.gov.homeoffice.json.Json
   * Subscribe to SQS messages.
   * Process a message by implementing method "process".
   * Then after processing a message, you may (should) perform "after processing" functionality such as deleting the processed message from the SQS queue and if necessary publishing any error to an associated error queue.
-  *
   * @param subscriber Subscriber Amazon SQS subscriber which wraps connection functionality to an instance of SQS.
   * @param listeners Seq[ActorRef] Registered listeners will be informed of all messages received by this actor.
   */
@@ -28,7 +27,6 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
 
   /**
     * Implement your functionality i.e. process a received Message
-    *
     * @param m Message
     * @return Future The outcome of processing the given Message
     */
@@ -86,7 +84,6 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
 
   /**
     * After processing does nothing unless you say so by mixing in an AfterProcess, or simply overriding this method.
-    *
     * @param message Message being processed.
     * @tparam R The type of result from processing
     * @return PartialFunction[Try[R], _]
@@ -101,7 +98,6 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
     * (i)   Use Akka messaging e.g. have your implenting actor of this class fire a Processed to itself, or have another actor fire said message to this actor.
     * (ii)  Mixin an AfterProcess such as DefaultAfterProcess
     * (iii) Call this method directly from your own process method.
-    *
     * @param message Message to delete
     * @return Message that was successfully deleted
     */
@@ -118,7 +114,6 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
     * (ii)  Mixin an AfterProcess such as DefaultAfterProcess
     * (iii) Call this method directly from your own process method.
     * EXTRA NOTE If you do override this method, you will probably want to call delete(message) - if you don't, the original message will hang around.
-    *
     * @param t Throwable that indicates what went wrong with processing a received message
     * @param message Message the message that could not be processed
     * @return Message that could not be processed and has been successfully published as an error

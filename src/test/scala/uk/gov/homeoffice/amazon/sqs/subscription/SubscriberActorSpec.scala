@@ -7,16 +7,19 @@ import akka.actor.Props
 import akka.testkit.TestActorRef
 import org.json4s.JValue
 import org.json4s.jackson.JsonMethods._
+import org.specs2.ActorExpectations
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
+import uk.gov.homeoffice.amazon.sqs._
 import uk.gov.homeoffice.amazon.sqs.subscription.Protocol.ProcessingError
-import uk.gov.homeoffice.amazon.sqs.{EmbeddedSQSServer, Message, Publisher, Queue}
 import uk.gov.homeoffice.concurrent.PromiseOps
 import uk.gov.homeoffice.json.JsonFormats
 
 class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats with PromiseOps {
-  trait Context extends ActorSystemContext with EmbeddedSQSServer {
+  trait Context extends ActorSystemContext with ActorExpectations with EmbeddedSQSServer {
+    implicit val listeners = Seq(testActor)
+
     val queue = create(new Queue("test-queue"))
   }
 
@@ -54,6 +57,23 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
 
       "Processing failed" must eventually(beEqualTo((publishedErrorMessage \ "error-message" \ "errorStackTrace" \ "errorMessage").extract[String]))
     }
+
+    "reject a string via only messaging" in new Context {
+      val actor = TestActorRef {
+        new SubscriberActor(new Subscriber(queue)) with DefaultAfterProcess {
+          def process(m: Message) = Future {
+            self ! ProcessingError(new Exception("Processing failed"), m)
+          }
+        }
+      }
+
+      actor.underlyingActor receive createMessage("blah")
+
+      eventuallyExpectMsg[ProcessingError] {
+        case ProcessingError(throwable, message) =>
+          throwable.getMessage == "Processing failed" && message.content == "blah"
+      }
+    }
   }
 
   "Subscriber actor with only messages" should {
@@ -89,6 +109,11 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
       publisher publish "blah"
 
       result.future must throwAn[Exception](message = "Processing failed").await
+
+      eventuallyExpectMsg[ProcessingError] {
+        case ProcessingError(throwable, message) =>
+          throwable.getMessage == "Processing failed" && message.content == "blah"
+      }
 
       val errorSubscriber = new Subscriber(queue)
 

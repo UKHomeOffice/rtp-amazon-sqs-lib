@@ -4,11 +4,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Try
-import akka.actor.Actor
+import akka.actor.{Actor, ActorLogging, ActorRef}
+import akka.event.LoggingReceive
 import com.amazonaws.services.sqs.model.{Message => SQSMessage}
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
-import grizzled.slf4j.Logging
 import uk.gov.homeoffice.amazon.sqs._
 import uk.gov.homeoffice.amazon.sqs.subscription.Protocol.{Processed, ProcessingError}
 import uk.gov.homeoffice.json.Json
@@ -17,12 +17,14 @@ import uk.gov.homeoffice.json.Json
   * Subscribe to SQS messages.
   * Process a message by implementing method "process".
   * Then after processing a message, you may (should) perform "after processing" functionality such as deleting the processed message from the SQS queue and if necessary publishing any error to an associated error queue.
-  * @param subscriber Amazon SQS subscriber which wraps connection functionality to an instance of SQS
+  *
+  * @param subscriber Subscriber Amazon SQS subscriber which wraps connection functionality to an instance of SQS.
+  * @param listeners Seq[ActorRef] Registered listeners will be informed of all messages received by this actor.
   */
-abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueCreation with Json with Logging with AfterProcess {
+abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[ActorRef] = Seq.empty[ActorRef]) extends Actor with QueueCreation with Json with ActorLogging with AfterProcess {
   implicit val sqsClient = subscriber.sqsClient
   val queue = subscriber.queue
-  val publisher = new Publisher(queue)(sqsClient)
+  val publisher = new Publisher(queue)
 
   /**
     * Implement your functionality i.e. process a received Message
@@ -42,9 +44,19 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
   }
 
   /**
+    * Intercept message received so that they can be broadcast to any listeners.
+    * @return PartialFunction[Any, Any] Where the input is a message and the output is the same message.
+    */
+  def intercept: PartialFunction[Any, Any] = {
+    case message =>
+      listeners foreach { _ ! message}
+      message
+  }
+
+  /**
     * The actor's "main" method to process messages in its own mailbox (i.e. its own message queue)
     */
-  final def receive: Receive = {
+  def receive: Receive = intercept andThen LoggingReceive {
     case Subscribe =>
       subscriber.receive match {
         case Nil => context.system.scheduler.scheduleOnce(10 seconds, self, Subscribe) // TODO 10 seconds to be configurable
@@ -55,26 +67,26 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
       self ! new Message(sqsMessage)
 
     case message: Message =>
-      info(s"Received message: $message")
+      log.info(s"Received message: $message")
       process(message) andThen afterProcess(message)
 
       self ! Subscribe
 
     case Processed(message) =>
-      info(s"Processed message: $message")
-      println(s"===> MY TEMP DEBUG: Received message processed for $message")
+      log.info(s"Processed message: $message")
       delete(message)
 
     case ProcessingError(throwable, message) =>
-      info(s"Failed to process message: $message")
+      log.info(s"Failed to process message: $message")
       publishError(throwable, message)
 
     case other =>
-      error(s"""Received message that is "${`not-amazon-sqs-message`}" (must have been sent to this actor directly instead of coming from an Amazon SQS queue): $other""")
+      log.error(s"""Received message that is "${`not-amazon-sqs-message`}" (must have been sent to this actor directly instead of coming from an Amazon SQS queue): $other""")
   }
 
   /**
     * After processing does nothing unless you say so by mixing in an AfterProcess, or simply overriding this method.
+    *
     * @param message Message being processed.
     * @tparam R The type of result from processing
     * @return PartialFunction[Try[R], _]
@@ -101,10 +113,11 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
   /**
     * By default, error publication will publish a given exception as JSON along with the original message.
     * Override this for custom publication of an error upon invalid processing of a message from the message queue.
-    * * NOTE That by default this method is not called unless you either:
+    * NOTE That by default this method is not called unless you either:
     * (i)   Use Akka messaging e.g. have your implenting actor of this class fire a ProcessingError to itself, or have another actor fire said message to this actor.
     * (ii)  Mixin an AfterProcess such as DefaultAfterProcess
     * (iii) Call this method directly from your own process method.
+    * EXTRA NOTE If you do override this method, you will probably want to call delete(message) - if you don't, the original message will hang around.
     *
     * @param t Throwable that indicates what went wrong with processing a received message
     * @param message Message the message that could not be processed
@@ -119,7 +132,7 @@ abstract class SubscriberActor(subscriber: Subscriber) extends Actor with QueueC
     * </pre>
     */
   def publishError(t: Throwable, message: Message): Message = {
-    info(s"Publishing error ${t.getMessage}")
+    log.info(s"Publishing error: ${t.getMessage}")
 
     publisher publishError compact(render(
       ("error-message" -> toJson(t)) ~

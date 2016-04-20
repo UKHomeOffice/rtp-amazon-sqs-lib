@@ -80,8 +80,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
         }
       }
 
-      val input = JObject("input" -> JInt(0))
-      actor.underlyingActor receive createMessage(compact(render(input)))
+      actor.underlyingActor receive createMessage(compact(render(JObject("input" -> JInt(0)))))
 
       val errorSubscriber = new Subscriber(queue)
 
@@ -142,15 +141,15 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
     }
 
     "receive valid JSON from a RESTful POST and process it" in new Context with REST {
-      val result = Promise[String Or JsonError]()
-
       val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
-        .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
-        .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(JObject("input" -> JString("blah")))))) map { response =>
+                             .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
+                             .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(JObject("input" -> JString("blah")))))) map { response =>
         response.status
       }
 
       response must beEqualTo(OK).await
+
+      val result = Promise[String Or JsonError]()
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
@@ -165,8 +164,8 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
       val input = JObject("input" -> JInt(0))
 
       val response = wsClient.url(s"$sqsHost/queue/${queue.queueName}")
-        .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
-        .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(input)))) map { response =>
+                             .withHeaders("Content-Type" -> "application/x-www-form-urlencoded")
+                             .post(params("Action" -> "SendMessage", "MessageBody" -> compact(render(input)))) map { response =>
         response.status
       }
 
@@ -186,7 +185,7 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
         val `error-message` = parse(errorSubscriber.receiveErrors.head.content) \ "error-message"
 
         (`error-message` \ "json" == input) &&
-          (`error-message` \ "error").extract[String].contains("error: instance type (integer) does not match any allowed primitive type")
+        (`error-message` \ "error").extract[String].contains("error: instance type (integer) does not match any allowed primitive type")
       } getOrElse false
 
       true must eventually(beEqualTo(publishedErrorMessage))

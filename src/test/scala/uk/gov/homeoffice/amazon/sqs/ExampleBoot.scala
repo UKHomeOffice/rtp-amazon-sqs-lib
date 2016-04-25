@@ -1,14 +1,11 @@
 package uk.gov.homeoffice.amazon.sqs
 
 import java.net.URL
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import akka.actor.{ActorSystem, Props}
 import com.amazonaws.auth.BasicAWSCredentials
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
 import uk.gov.homeoffice.amazon.sqs.subscription.{JsonSubscription, Subscriber, SubscriberActor}
-import uk.gov.homeoffice.json.JsonSchema
 import uk.gov.homeoffice.system.Exit
 
 /**
@@ -43,23 +40,9 @@ object ExampleBoot extends App {
 trait ExampleSubscription extends JsonSubscription with Exit {
   this: SubscriberActor =>
 
-  val jsonSchema = JsonSchema(
-    ("id" -> "http://www.bad.com/schema") ~
-      ("$schema" -> "http://json-schema.org/draft-04/schema") ~
-      ("type" -> "object") ~
-      ("properties" ->
-        ("input" ->
-          ("type" -> "string")))
-  )
-
-  /**
-    * Implement your functionality i.e. process a received Message
-    * @param m Message
-    * @return Future The outcome of processing the given Message
-    */
-  override def process(m: Message) = Future {
-    exitAfter {
-      val result = "Well Done!"
+  def receive: Receive = {
+    case m: Message => exitAfter {
+      val result = s"Well Done! Processed given message $m"
       println(result)
       result
     }

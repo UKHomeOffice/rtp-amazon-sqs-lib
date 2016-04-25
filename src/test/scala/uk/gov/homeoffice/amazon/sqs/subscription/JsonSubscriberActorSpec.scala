@@ -10,7 +10,7 @@ import org.json4s.JsonAST.JObject
 import org.json4s.JsonDSL._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import org.scalactic.{Bad, Good, Or}
+import org.scalactic.{Good, Or}
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
@@ -36,37 +36,22 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
     }
   }
 
-  "JSON subscriber (test) actor" should {
-    "receive any old JSON and process it" in new Context {
-      val result = Promise[String]()
-
-      val actor = TestActorRef {
-        new SubscriberActor(new Subscriber(queue)) with JsonSubscription {
-          def process(m: Message) = result <~ Future {
-            parse(m, EmptyJsonSchema)
-            "Well done!"
-          }
-        }
-      }
-
-      actor.underlyingActor receive createMessage(compact(render(JObject("input" -> JString("blah")))))
-
-      result.future must beEqualTo("Well done!").await
-    }
-
+  "JSON subscriber actor" should {
     "receive valid JSON and process it" in new Context {
       val result = Promise[String]()
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(m: Message) = result <~ Future {
-            parse(m, jsonSchema)
-            "Well done!"
+          def receive: Receive = {
+            case m: Message => result <~ Future {
+              parse(m, jsonSchema)
+              "Well done!"
+            }
           }
         }
       }
 
-      actor.underlyingActor receive createMessage(compact(render(JObject("input" -> JString("blah")))))
+      actor ! createMessage(compact(render(JObject("input" -> JString("blah")))))
 
       result.future must beEqualTo("Well done!").await
     }
@@ -74,13 +59,13 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
     "receive JSON and fail to validate" in new Context {
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(m: Message) = Future {
-            parse(m, jsonSchema)
+          def receive: Receive = {
+            case m: Message => parse(m, jsonSchema)
           }
         }
       }
 
-      actor.underlyingActor receive createMessage(compact(render(JObject("input" -> JInt(0)))))
+      actor ! createMessage(compact(render(JObject("input" -> JInt(0)))))
 
       val errorSubscriber = new Subscriber(queue)
 
@@ -92,14 +77,16 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
     }
   }
 
-  "JSON subscriber actor" should {
+  "JSON subscriber actor with only messages" should {
     "receive valid JSON and process it" in new Context {
       val result = Promise[String Or JsonError]()
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(m: Message) = result <~ Future {
-            parse(m, jsonSchema) map { _ => "Well done!" }
+          def receive: Receive = {
+            case m: Message => result <~ Future {
+              parse(m, jsonSchema) map { _ => "Well done!" }
+            }
           }
         }
       }
@@ -111,11 +98,11 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
     }
 
     "receive JSON and fail to validate" in new Context {
-      val result = Promise[JValue Or JsonError]()
-
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(m: Message) = result <~ Future { parse(m, jsonSchema) }
+          def receive: Receive = {
+            case m: Message => parse(m, jsonSchema)
+          }
         }
       }
 
@@ -123,10 +110,6 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       val input = JObject("input" -> JInt(0))
       publisher publish compact(render(input))
-
-      result.future must beLike[JValue Or JsonError] {
-        case Bad(JsonError(_, Some(error), _)) => error must contain("error: instance type (integer) does not match any allowed primitive type")
-      }.await
 
       val errorSubscriber = new Subscriber(queue)
 
@@ -153,7 +136,11 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(m: Message) = result <~ Future { parse(m, jsonSchema) map { _ => "Well done!"} }
+          def receive: Receive = {
+            case m: Message => result <~ Future {
+              parse(m, jsonSchema) map { _ => "Well done!" }
+            }
+          }
         }
       }
 
@@ -173,8 +160,8 @@ class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification w
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) with MyJsonSubscription {
-          def process(m: Message) = Future {
-            parse(m, jsonSchema)
+          def receive: Receive = {
+            case m: Message => parse(m, jsonSchema)
           }
         }
       }

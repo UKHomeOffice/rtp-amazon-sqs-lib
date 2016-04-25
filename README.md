@@ -144,18 +144,9 @@ object ExampleBoot extends App {
 trait ExampleSubscription extends JsonSubscription with Exit {
   this: SubscriberActor =>
 
-  val jsonSchema = JsonSchema(
-    ("id" -> "http://www.bad.com/schema") ~
-      ("$schema" -> "http://json-schema.org/draft-04/schema") ~
-      ("type" -> "object") ~
-      ("properties" ->
-        ("input" ->
-          ("type" -> "string")))
-  )
-
-  override def process(m: Message) = Future {
-    exitAfter {
-      val result = "Well Done!"
+  def receive: Receive = {
+    case m: Message => exitAfter {
+      val result = s"Well Done! Processed given message $m"
       println(result)
       result
     }

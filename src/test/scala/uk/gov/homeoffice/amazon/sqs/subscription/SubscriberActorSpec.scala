@@ -12,7 +12,6 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
 import uk.gov.homeoffice.amazon.sqs._
-import uk.gov.homeoffice.amazon.sqs.subscription.Protocol.ProcessingError
 import uk.gov.homeoffice.concurrent.PromiseOps
 import uk.gov.homeoffice.json.JsonFormats
 
@@ -29,50 +28,33 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
 
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue)) {
-          def process(m: Message) = result <~ Future { m.content }
+          def receive: Receive = {
+            case m: Message => result <~ Future { m.content }
+          }
         }
       }
 
-      actor.underlyingActor receive createMessage("blah")
+      actor ! createMessage("blah")
 
       result.future must beEqualTo("blah").await
     }
 
     "reject a string" in new Context {
-      val result = Promise[String]()
-
       val actor = TestActorRef {
-        new SubscriberActor(new Subscriber(queue)) with DefaultAfterProcess {
-          def process(m: Message) = result <~> Future { throw new Exception("Processing failed") }
+        new SubscriberActor(new Subscriber(queue)) {
+          def receive: Receive = {
+            case m: Message => publishError(new Exception("Processing failed"), m)
+          }
         }
       }
 
-      actor.underlyingActor receive createMessage("blah")
-
-      result.future must throwAn[Exception](message = "Processing failed").await
+      actor ! createMessage("blah")
 
       val errorSubscriber = new Subscriber(queue)
 
       def publishedErrorMessage: JValue = parse(errorSubscriber.receiveErrors.head.content)
 
       "Processing failed" must eventually(beEqualTo((publishedErrorMessage \ "error-message" \ "errorStackTrace" \ "errorMessage").extract[String]))
-    }
-
-    "reject a string via only messaging" in new Context {
-      val actor = TestActorRef {
-        new SubscriberActor(new Subscriber(queue)) with DefaultAfterProcess {
-          def process(m: Message) = Future {
-            self ! ProcessingError(new Exception("Processing failed"), m)
-          }
-        }
-      }
-
-      actor.underlyingActor receive createMessage("blah")
-
-      eventuallyExpectMsg[ProcessingError] {
-        case ProcessingError(throwable, message) =>
-          throwable.getMessage == "Processing failed" && message.content == "blah"
-      }
     }
   }
 
@@ -82,7 +64,9 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
 
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) {
-          def process(m: Message) = result <~ Future { m.content }
+          def receive: Receive = {
+            case m: Message => result <~ Future { m.content }
+          }
         }
       }
 
@@ -93,14 +77,10 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
     }
 
     "reject a string, publish error and delete said string" in new Context {
-      val result = Promise[String]()
-
       system actorOf Props {
         new SubscriberActor(new Subscriber(queue)) {
-          def process(m: Message) = result <~> Future {
-            val exception = new Exception("Processing failed")
-            self ! ProcessingError(exception, m)
-            throw exception
+          def receive: Receive = {
+            case m: Message => publishError(new Exception("Processing failed"), m)
           }
         }
       }
@@ -108,12 +88,10 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
       val publisher = new Publisher(queue)
       publisher publish "blah"
 
-      result.future must throwAn[Exception](message = "Processing failed").await
-
-      eventuallyExpectMsg[ProcessingError] {
+      /*eventuallyExpectMsg[ProcessingError] {
         case ProcessingError(throwable, message) =>
           throwable.getMessage == "Processing failed" && message.content == "blah"
-      }
+      }*/
 
       val errorSubscriber = new Subscriber(queue)
 

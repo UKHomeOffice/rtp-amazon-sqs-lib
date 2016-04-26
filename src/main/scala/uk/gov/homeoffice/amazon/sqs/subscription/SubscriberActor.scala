@@ -14,7 +14,6 @@ import uk.gov.homeoffice.json.Json
   * Process a message by implementing "receive".
   * Your receive function should at least handle Message. However, it should also handle your own custom protocol of messages.
   * After a Message has been processed, you should probably delete the message from the queue and if necessary handle any errors such as publishing an error message.
-  *
   * @param subscriber Subscriber Amazon SQS subscriber which wraps connection functionality to an instance of SQS.
   * @param listeners Seq[ActorRef] Registered listeners will be informed of all messages received by this actor.
   */
@@ -59,9 +58,13 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
         self ! new Message(sqsMessage)
 
       case message: Message =>
-        log.info(s"Received message: $message")
+        log.info(s"Received subscribed message: $message")
         receive.applyOrElse(message, unhandled)
         self ! Subscribe
+
+      case msg =>
+        log.info(s"Received message: $msg")
+        receive.applyOrElse(msg, unhandled)
     }
 
     (broadcast andThen handle)(message)
@@ -72,34 +75,6 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
     * You need to handle a subscribed Message as well as your custom protocol.
     */
   def receive: Receive
-
-  /*def receive: Receive = intercept andThen LoggingReceive {
-    case Subscribe =>
-      subscriber.receive match {
-        case Nil => context.system.scheduler.scheduleOnce(10 seconds, self, Subscribe) // TODO 10 seconds to be configurable
-        case messages => messages foreach { self ! _ }
-      }
-
-    case sqsMessage: SQSMessage =>
-      self ! new Message(sqsMessage)
-
-    case message: Message =>
-      log.info(s"Received message: $message")
-      process(message) andThen afterProcess(message)
-
-      self ! Subscribe
-
-    case Processed(message) =>
-      log.info(s"Processed message: $message")
-      delete(message)
-
-    case ProcessingError(throwable, message) =>
-      log.info(s"Failed to process message: $message")
-      publishError(throwable, message)
-
-    case other =>
-      log.error(s"""Received message that is "${`not-amazon-sqs-message`}" (must have been sent to this actor directly instead of coming from an Amazon SQS queue): $other""")
-  }*/
 
   /**
     * Override this method for custom deletion of messages from the message queue, or even to not delete a message.
@@ -124,7 +99,6 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
     * (ii)  Mixin an AfterProcess such as DefaultAfterProcess
     * (iii) Call this method directly from your own process method.
     * EXTRA NOTE If you do override this method, you will probably want to call delete(message) - if you don't, the original message will hang around.
- *
     * @param t Throwable that indicates what went wrong with processing a received message
     * @param message Message the message that could not be processed
     * @return Message that could not be processed and has been successfully published as an error

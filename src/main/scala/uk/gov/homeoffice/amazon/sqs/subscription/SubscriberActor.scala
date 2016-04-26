@@ -39,6 +39,9 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
   override final def aroundReceive(receive: Receive, message: Any): Unit = {
     /** Intercept message received so that it can be broadcast to any listeners. */
     val broadcast: PartialFunction[Any, Any] = {
+      case m @ Subscribe =>
+        m // This type of message is not broadcast.
+
       case m =>
         listeners foreach { _ ! m}
         m
@@ -47,11 +50,9 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
     /** This actor only knows about Subscribe or Message - note that Message will be passed onto a concrete actor's custom "receive" function. */
     val handle: PartialFunction[Any, Any] = {
       case Subscribe =>
-        subscriber.receive match {
+        subscriber receive match {
           case Nil => context.system.scheduler.scheduleOnce(10 seconds, self, Subscribe) // TODO 10 seconds to be configurable
-          case messages => messages foreach {
-            self ! _
-          }
+          case messages => messages foreach { self ! _ }
         }
 
       case sqsMessage: SQSMessage =>

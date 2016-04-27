@@ -1,6 +1,7 @@
 package uk.gov.homeoffice.amazon.sqs.subscription
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.concurrent.{Future, Promise}
 import scala.util.Try
 import akka.actor.Props
@@ -74,7 +75,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
       val publisher = new Publisher(queue)
       publisher publish "blah"
 
-      result.future must beEqualTo("blah").await
+      result.future must beEqualTo("blah").awaitFor(5 seconds)
     }
 
     "reject a string, publish error and delete said string" in new Context {

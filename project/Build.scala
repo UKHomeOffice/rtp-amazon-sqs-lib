@@ -41,14 +41,14 @@ object Build extends Build {
     .settings(libraryDependencies ++= {
       val `akka-version` = "2.4.2"
       val `play-version` = "2.5.0"
-      val `elasticmq-version` = "0.8.12"
+      val `elasticmq-version` = "0.9.3"
       val `gatling-version` = "2.1.7"
       val `rtp-test-lib-version` = "1.2.4"
       val `rtp-akka-lib-version` = "1.6.7-SNAPSHOT"
 
       Seq(
-        "org.elasticmq" %% "elasticmq-core" % `elasticmq-version` withSources(),
-        "org.elasticmq" %% "elasticmq-rest-sqs" % `elasticmq-version` withSources(),
+        "org.elasticmq" %% "elasticmq-core" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray"),
+        "org.elasticmq" %% "elasticmq-rest-sqs" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray"),
         "com.typesafe.play" %% "play-ws" % `play-version` withSources(),
         "org.scalactic" %% "scalactic" % "2.2.6" withSources(),
         "ch.qos.logback" % "logback-classic" % "1.1.3" withSources(),
@@ -56,7 +56,7 @@ object Build extends Build {
         "com.amazonaws" % "aws-java-sdk" % "1.10.62" exclude ("commons-logging", "commons-logging"),
         "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "1.50.2" withSources(),
         "uk.gov.homeoffice" %% "rtp-test-lib" % `rtp-test-lib-version` withSources(),
-        "uk.gov.homeoffice" %% "rtp-akka-lib" % `rtp-akka-lib-version` withSources() excludeAll ExclusionRule(organization = "io.spray")
+        "uk.gov.homeoffice" %% "rtp-akka-lib" % `rtp-akka-lib-version` withSources()
       ) ++ Seq(
         "io.gatling.highcharts" % "gatling-charts-highcharts" % `gatling-version` % IntegrationTest withSources(),
         "io.gatling" % "gatling-test-framework" % `gatling-version` % IntegrationTest withSources(),
@@ -65,7 +65,7 @@ object Build extends Build {
         "com.typesafe.play" %% "play-test" % `play-version` % Test withSources(),
         "com.typesafe.play" %% "play-specs2" % `play-version` % Test withSources(),
         "uk.gov.homeoffice" %% "rtp-test-lib" % `rtp-test-lib-version` % Test classifier "tests" withSources(),
-        "uk.gov.homeoffice" %% "rtp-akka-lib" % `rtp-akka-lib-version` % Test classifier "tests" withSources() excludeAll ExclusionRule(organization = "io.spray")
+        "uk.gov.homeoffice" %% "rtp-akka-lib" % `rtp-akka-lib-version` % Test classifier "tests" withSources()
       )
     })
 }

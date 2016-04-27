@@ -129,10 +129,11 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
         }
       }
 
-      val message = "blah"
-
       val publisher = new Publisher(queue)
+
       publisher publish "Crash"
+
+      val message = "blah"
       publisher publish message
 
       eventuallyExpectMsg[Processed] {

@@ -12,6 +12,7 @@ import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import uk.gov.homeoffice.akka.ActorSystemContext
 import uk.gov.homeoffice.amazon.sqs._
+import uk.gov.homeoffice.amazon.sqs.subscription.Protocol.Processed
 import uk.gov.homeoffice.concurrent.PromiseOps
 import uk.gov.homeoffice.json.JsonFormats
 
@@ -22,7 +23,7 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
     val queue = create(new Queue("test-queue"))
   }
 
-  "Subscriber (test) actor" should {
+  "Subscriber actor" should {
     "receive a string and process it" in new Context {
       val result = Promise[String]()
 
@@ -88,11 +89,6 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
       val publisher = new Publisher(queue)
       publisher publish "blah"
 
-      /*eventuallyExpectMsg[ProcessingError] {
-        case ProcessingError(throwable, message) =>
-          throwable.getMessage == "Processing failed" && message.content == "blah"
-      }*/
-
       val errorSubscriber = new Subscriber(queue)
 
       def publishedErrorMessage: Boolean = Try {
@@ -100,6 +96,48 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
       } getOrElse false
 
       true must eventually(beEqualTo(publishedErrorMessage))
+    }
+  }
+
+  "Subscriber actor with only messages and a message protocol" should {
+    "receive a string, fire a message indicating that the message has been processed" in new Context {
+      system actorOf Props {
+        new SubscriberActor(new Subscriber(queue)) {
+          def receive: Receive = {
+            case m: Message => sender() ! Processed(m)
+          }
+        }
+      }
+
+      val message = "blah"
+
+      val publisher = new Publisher(queue)
+      publisher publish message
+
+      eventuallyExpectMsg[Processed] {
+        case Processed(m) => m.content == message
+      }
+    }
+
+    "throw an exception for first message, then receive a string, fire a message indicating that the message has been processed" in new Context {
+      system actorOf Props {
+        new SubscriberActor(new Subscriber(queue)) {
+          def receive: Receive = {
+            case m: Message if m.content == "Crash" => throw new Exception("Crash")
+            case m: Message => sender() ! Processed(m)
+          }
+        }
+      }
+
+      val message = "blah"
+
+      val publisher = new Publisher(queue)
+      publisher publish "Crash"
+      publisher publish message
+
+      eventuallyExpectMsg[Processed] {
+        case Processed(m) => m.content == message
+      }
     }
   }
 }

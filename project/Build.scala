@@ -43,7 +43,7 @@ object Build extends Build {
       val `play-version` = "2.5.0"
       val `elasticmq-version` = "0.8.12"
       val `gatling-version` = "2.1.7"
-      val `rtp-test-lib-version` = "1.2.3"
+      val `rtp-test-lib-version` = "1.2.4"
       val `rtp-akka-lib-version` = "1.6.7-SNAPSHOT"
 
       Seq(

@@ -25,7 +25,7 @@ trait JsonSubscription {
   }
 
   /**
-    * Error publication of SubscriberActor is overridden to handle JSON errors.
+    * JSON Error publication.
     */
   def publishError(jsonError: JsonError, message: Message): JsonError = {
     log.info(s"Publishing error ${jsonError.error}")

@@ -47,8 +47,8 @@ object Build extends Build {
       val `rtp-akka-lib-version` = "1.7.1"
 
       Seq(
-        "org.elasticmq" %% "elasticmq-core" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray") exclude ("com.typesafe.akka", "akka-stream-experimental") exclude ("com.typesafe.akka", "akka-http-core-experimental"),
-        "org.elasticmq" %% "elasticmq-rest-sqs" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray") exclude ("com.typesafe.akka", "akka-stream-experimental") exclude ("com.typesafe.akka", "akka-http-core-experimental"),
+        "org.elasticmq" %% "elasticmq-core" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray"),
+        "org.elasticmq" %% "elasticmq-rest-sqs" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray"),
         "com.typesafe.play" %% "play-ws" % `play-version` withSources(),
         "org.scalactic" %% "scalactic" % "2.2.6" withSources(),
         "ch.qos.logback" % "logback-classic" % "1.1.3" withSources(),

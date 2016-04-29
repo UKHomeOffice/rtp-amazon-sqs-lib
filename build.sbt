@@ -18,5 +18,6 @@ publishArtifact in (Test, packageDoc) := true
 // Enable publishing the test sources jar
 publishArtifact in (Test, packageSrc) := true
 
+test in assembly := {}
 
 fork in run := true

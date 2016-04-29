@@ -39,7 +39,7 @@ object Build extends Build {
       )
     )
     .settings(libraryDependencies ++= {
-      val `akka-version` = "2.4.2"
+      val `akka-version` = "2.4.4"
       val `play-version` = "2.5.0"
       val `elasticmq-version` = "0.9.3"
       val `gatling-version` = "2.1.7"

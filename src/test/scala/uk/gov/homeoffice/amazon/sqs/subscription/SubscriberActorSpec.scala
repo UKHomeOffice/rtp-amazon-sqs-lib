@@ -8,10 +8,9 @@ import akka.actor.Props
 import akka.testkit.TestActorRef
 import org.json4s.JValue
 import org.json4s.jackson.JsonMethods._
-import org.specs2.ActorExpectations
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
-import uk.gov.homeoffice.akka.ActorSystemContext
+import uk.gov.homeoffice.akka.{ActorExpectations, ActorSystemContext}
 import uk.gov.homeoffice.amazon.sqs._
 import uk.gov.homeoffice.amazon.sqs.subscription.Protocol.Processed
 import uk.gov.homeoffice.concurrent.PromiseOps

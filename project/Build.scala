@@ -43,12 +43,12 @@ object Build extends Build {
       val `play-version` = "2.5.0"
       val `elasticmq-version` = "0.9.3"
       val `gatling-version` = "2.1.7"
-      val `rtp-test-lib-version` = "1.2.4"
-      val `rtp-akka-lib-version` = "1.7.1"
+      val `rtp-test-lib-version` = "1.3.1"
+      val `rtp-akka-lib-version` = "1.7.3"
 
       Seq(
-        "org.elasticmq" %% "elasticmq-core" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray"),
-        "org.elasticmq" %% "elasticmq-rest-sqs" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray"),
+        "org.elasticmq" %% "elasticmq-core" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray") withSources(),
+        "org.elasticmq" %% "elasticmq-rest-sqs" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray") withSources(),
         "com.typesafe.play" %% "play-ws" % `play-version` withSources(),
         "org.scalactic" %% "scalactic" % "2.2.6" withSources(),
         "ch.qos.logback" % "logback-classic" % "1.1.3" withSources(),

@@ -27,14 +27,12 @@ trait EmbeddedSQSServer extends SQSServer with QueueCreation with Scope with Com
       subscriber.receive.head
     }
 
-  override def around[R: AsResult](r: => R): Result = {
-    try {
-      server waitUntilStarted()
-      info(s"Started SQS $sqsHost")
-      super.around(r)
-    } finally {
-      info(s"Stopping SQS $sqsHost")
-      server stopAndWait()
-    }
+  override def around[R: AsResult](r: => R): Result = try {
+    server waitUntilStarted()
+    info(s"Started SQS $sqsHost")
+    super.around(r)
+  } finally {
+    info(s"Stopping SQS $sqsHost")
+    server stopAndWait()
   }
 }

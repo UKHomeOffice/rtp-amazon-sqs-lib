@@ -119,6 +119,11 @@ Example of booting an application to publish/subscribe to an Amazon SQS instance
 java -jar elasticmq-server-0.9.0.jar
 ```
 which starts up a working server that binds to localhost:9324
+
+or with a custom configuration that could create queues:
+```bash
+java -Dconfig.file=src/test/resources/application.test.conf -jar elasticmq-server-0.9.0.jar
+```
    
 2) Boot this application:
 ```bash

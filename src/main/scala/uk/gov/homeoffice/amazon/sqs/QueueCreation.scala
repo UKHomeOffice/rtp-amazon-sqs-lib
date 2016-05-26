@@ -10,7 +10,7 @@ trait QueueCreation extends Logging {
       info(s"Creating queue $queueName")
       sqsClient createQueue queueName
     } catch {
-      case t: Throwable => warn(t.getMessage)
+      case t: Throwable => warn(s"Queue $queueName may already be created - Exception: ${t.getMessage}")
     }
 
     createQueue(queue.queueName)

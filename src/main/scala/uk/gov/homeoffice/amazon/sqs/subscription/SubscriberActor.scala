@@ -27,6 +27,7 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
     */
   override def preStart() = {
     super.preStart()
+    info("Initialising...")
     create(queue)
     self ! Subscribe
   }

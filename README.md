@@ -116,13 +116,13 @@ Example of booting an application to publish/subscribe to an Amazon SQS instance
 
 1) Start up an instance of ElasticMQ (to run an instance of Amazon SQS locally) - From the root of this project:
 ```bash
-java -jar elasticmq-server-0.9.0.jar
+java -jar elasticmq-server-0.9.3.jar
 ```
 which starts up a working server that binds to localhost:9324
 
 or with a custom configuration that could create queues:
 ```bash
-java -Dconfig.file=src/test/resources/application.test.conf -jar elasticmq-server-0.9.0.jar
+java -Dconfig.file=src/test/resources/application.test.conf -jar elasticmq-server-0.9.3.jar
 ```
    
 2) Boot this application:

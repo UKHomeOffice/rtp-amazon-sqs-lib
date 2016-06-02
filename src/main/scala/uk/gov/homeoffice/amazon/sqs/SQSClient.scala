@@ -5,9 +5,9 @@ import com.amazonaws.auth.AWSCredentials
 import com.amazonaws.services.sqs.AmazonSQSClient
 
 class SQSClient(val sqsHost: URL, credentials: AWSCredentials) extends AmazonSQSClient(credentials) {
-  val Host = """^http[s]?:\/?\/?([^:\/\s]+)((\/\w+)*\/?)""".r // TODO This is kind of shit
+  val Host = """^http[s]?:\/?\/?([^:\/\s]+)\/?\w*\/?""".r
 
   sqsHost.toString match {
-    case Host(h, _, _) => setEndpoint(h)
+    case Host(h) => setEndpoint(h)
   }
 }

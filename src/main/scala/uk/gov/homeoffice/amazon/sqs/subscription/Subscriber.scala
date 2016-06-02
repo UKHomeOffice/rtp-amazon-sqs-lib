@@ -11,7 +11,16 @@ class Subscriber(val queue: Queue)(implicit val sqsClient: SQSClient) extends Qu
   def receiveErrors: Seq[Message] = receive(queue.errorQueueName)
 
   private def receive(queueName: String): Seq[Message] = try {
-    sqsClient.receiveMessage(queueUrl(queueName)).getMessages.map(new Message(_))
+    val messages = sqsClient.receiveMessage(queueUrl(queueName)).getMessages.map(new Message(_)).toList
+
+    messages.size match {
+      case 0 => debug("Received 0 messages")
+      case 1 => info(s"Received 1 message")
+      case x => info(s"Received $x messages")
+    }
+
+    messages
+
   } catch {
     case t: Throwable =>
       t.printStackTrace()

@@ -8,7 +8,7 @@ class SQSClient(val sqsHost: URL, credentials: AWSCredentials) extends AmazonSQS
   val Host = """^(http[s]?:\/?\/?[^:\/\s]+):?(\d*).*""".r
 
   sqsHost.toString match {
-    case Host(h, p) if p == "" => setEndpoint(h)
     case Host(h, p) => setEndpoint(s"$h:$p")
+    case Host(h) => setEndpoint(h)
   }
 }

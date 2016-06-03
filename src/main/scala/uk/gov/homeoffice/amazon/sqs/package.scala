@@ -5,7 +5,7 @@ package object sqs {
 
   val `not-amazon-sqs-message` = "Not Amazon SQS Message"
 
-  def queueUrl(queueName: String)(implicit sqsClient: SQSClient): String = s"${sqsClient.sqsHost}/queue/$queueName"
+  def queueUrl(queueName: String)(implicit sqsClient: SQSClient): String = s"${sqsClient.sqsHost}/$queueName"
 
   case object Subscribe
 }

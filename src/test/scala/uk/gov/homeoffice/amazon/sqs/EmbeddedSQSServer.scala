@@ -15,7 +15,7 @@ trait EmbeddedSQSServer extends SQSServer with QueueCreation with Scope with Com
 
   val server = SQSRestServerBuilder withInterface sqsHost.getHost withPort sqsHost.getPort start()
 
-  implicit val sqsClient = new SQSClient(sqsHost, new BasicAWSCredentials("x", "x"))
+  implicit val sqsClient = new SQSClient(new URL(s"$sqsHost/queue"), new BasicAWSCredentials("x", "x"))
 
   val createMessage: String => Message =
     message => {

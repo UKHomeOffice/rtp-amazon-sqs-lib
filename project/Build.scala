@@ -49,6 +49,7 @@ object Build extends Build {
       Seq(
         "org.elasticmq" %% "elasticmq-core" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray") withSources(),
         "org.elasticmq" %% "elasticmq-rest-sqs" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray") withSources(),
+        "xml-apis" % "xml-apis" % "1.4.01",
         "com.typesafe.play" %% "play-ws" % `play-version` withSources(),
         "org.scalactic" %% "scalactic" % "2.2.6" withSources(),
         "ch.qos.logback" % "logback-classic" % "1.1.3" withSources(),

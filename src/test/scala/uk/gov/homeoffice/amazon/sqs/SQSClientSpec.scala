@@ -25,5 +25,14 @@ class SQSClientSpec extends Specification with Mockito {
 
       endpointField.get(sqsClient) mustEqual new URI("https://sqs.eu-west-1.amazonaws.com")
     }
+
+    "be instantiated locally" in {
+      val sqsClient = new SQSClient(new URL("http://localhost:9234/queue"), mock[AWSCredentials])
+
+      val endpointField = classOf[AmazonWebServiceClient].getDeclaredField("endpoint")
+      endpointField.setAccessible(true)
+
+      endpointField.get(sqsClient) mustEqual new URI("http://localhost:9234")
+    }
   }
 }

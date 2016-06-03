@@ -23,7 +23,7 @@ import uk.gov.homeoffice.system.Exit
 object ExampleBoot extends App {
   val system = ActorSystem("amazon-sqs-actor-system")
 
-  implicit val sqsClient = new SQSClient(new URL("http://localhost:9324"), new BasicAWSCredentials("x", "x"))
+  implicit val sqsClient = new SQSClient(new URL("http://localhost:9324/queue"), new BasicAWSCredentials("x", "x"))
 
   val queue = new Queue("test-queue")
 

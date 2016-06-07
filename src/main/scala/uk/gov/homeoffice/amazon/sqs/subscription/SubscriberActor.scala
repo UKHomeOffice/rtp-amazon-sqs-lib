@@ -14,10 +14,11 @@ import uk.gov.homeoffice.json.Json
   * Process a message by implementing "receive".
   * Your receive function should at least handle Message. However, it should also handle your own custom protocol of messages.
   * After a Message has been processed, you should probably delete the message from the queue and if necessary handle any errors such as publishing an error message.
+  *
   * @param subscriber Subscriber Amazon SQS subscriber which wraps connection functionality to an instance of SQS.
-  * @param listeners Seq[ActorRef] Registered listeners will be informed of all messages received by this actor.
+  * @param listeners  Seq[ActorRef] Registered listeners will be informed of all messages received by this actor.
   */
-abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[ActorRef] = Seq.empty[ActorRef]) extends Actor with QueueCreation with Json with ActorLogging {
+abstract class SubscriberActor(subscriber: Subscriber, filters: (Message => Option[Message])*)(implicit listeners: Seq[ActorRef] = Seq.empty[ActorRef]) extends Actor with QueueCreation with Json with ActorLogging {
   implicit val sqsClient = subscriber.sqsClient
   val queue = subscriber.queue
   val publisher = new Publisher(queue)
@@ -34,17 +35,20 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
 
   /**
     * All messages received by your actor will be intercepted by this function.
+    *
     * @param receive Receive functionality being intercepted.
     * @param message Any The message that has been received for processing.
     */
   override final def aroundReceive(receive: Receive, message: Any): Unit = {
     /** Intercept message received so that it can be broadcast to any listeners. */
     val broadcast: PartialFunction[Any, Any] = {
-      case m @ Subscribe =>
+      case m@Subscribe =>
         m // This type of message is not broadcast.
 
       case m =>
-        listeners foreach { _ ! m}
+        listeners foreach {
+          _ ! m
+        }
         m
     }
 
@@ -53,7 +57,9 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
       case Subscribe =>
         subscriber receive match {
           case Nil => context.system.scheduler.scheduleOnce(10 seconds, self, Subscribe) // TODO 10 seconds to be configurable
-          case messages => messages foreach { self ! _ }
+          case messages => messages foreach {
+            self ! _
+          }
         }
 
       case sqsMessage: SQSMessage =>
@@ -61,7 +67,14 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
 
       case message: Message =>
         log.info(s"Received subscribed message: $message")
-        receive.applyOrElse(message, unhandled)
+
+        filters.foldLeft(Option(message)) { (m, f) =>
+          m flatMap f
+        } match {
+          case Some(msg) => receive.applyOrElse(msg, unhandled)
+          case _ => error(s"Filtered out (i.e. rejected) message $message")
+        }
+
         self ! Subscribe
 
       case msg =>
@@ -69,7 +82,7 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
         receive.applyOrElse(msg, unhandled)
     }
 
-    (broadcast andThen handle)(message)
+    (broadcast andThen handle) (message)
   }
 
   /**
@@ -101,24 +114,25 @@ abstract class SubscriberActor(subscriber: Subscriber)(implicit listeners: Seq[A
     * (ii)  Mixin an AfterProcess such as DefaultAfterProcess
     * (iii) Call this method directly from your own process method.
     * EXTRA NOTE If you do override this method, you will probably want to call delete(message) - if you don't, the original message will hang around.
-    * @param t Throwable that indicates what went wrong with processing a received message
+    *
+    * @param t       Throwable that indicates what went wrong with processing a received message
     * @param message Message the message that could not be processed
     * @return Message that could not be processed and has been successfully published as an error
     *
-    * An error is published (by default) as JSON with the format:
-    * <pre>
-    *   {
-    *     "error-message":    { ... },
-    *     "original-message": { ... }
-    *   }
-    * </pre>
+    *         An error is published (by default) as JSON with the format:
+    *         <pre>
+    *         {
+    *         "error-message":    { ... },
+    *         "original-message": { ... }
+    *         }
+    *         </pre>
     */
   def publishError(t: Throwable, message: Message): Message = {
     log.info(s"Publishing error: ${t.getMessage}")
 
     publisher publishError compact(render(
       ("error-message" -> toJson(t)) ~
-      ("original-message" -> message.toString)
+        ("original-message" -> message.toString)
     ))
 
     delete(message)

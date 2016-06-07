@@ -1,9 +1,7 @@
 package uk.gov.homeoffice.amazon.sqs.subscription
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
-import scala.concurrent.{Future, Promise}
-import scala.util.Try
+import java.util.concurrent.TimeUnit
+
 import akka.actor.Props
 import akka.testkit.TestActorRef
 import org.json4s.JValue
@@ -15,6 +13,10 @@ import uk.gov.homeoffice.amazon.sqs._
 import uk.gov.homeoffice.amazon.sqs.subscription.protocol.Processed
 import uk.gov.homeoffice.concurrent.PromiseOps
 import uk.gov.homeoffice.json.JsonFormats
+
+import scala.concurrent.duration._
+import scala.concurrent.{Future, Promise}
+import scala.util.Try
 
 class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats with PromiseOps {
   trait Context extends ActorSystemContext with ActorExpectations with EmbeddedSQSServer {
@@ -57,6 +59,65 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
 
       "Processing failed" must eventually(beEqualTo((publishedErrorMessage \ "error-message" \ "errorStackTrace" \ "errorMessage").extract[String]))
     }
+
+    "reject a message as it didn't pass through the filter" in new Context {
+      val actor = TestActorRef {
+        new SubscriberActor(new Subscriber(queue), rejectFilter) {
+          def receive: Receive = {
+            case m: Message => sender() ! Processed(m)
+          }
+        }
+      }
+
+      def rejectFilter(m: Message): Option[Message] = None
+
+      actor ! createMessage("blah")
+
+      expectMsgType[Message]
+      expectNoMsg(3 seconds)
+    }
+
+    "let the message pass through the filter" in new Context {
+      val actor = TestActorRef {
+        new SubscriberActor(new Subscriber(queue), acceptFilter) {
+          def receive: Receive = {
+            case m: Message =>
+              sender() ! Processed(m)
+          }
+        }
+      }
+
+      def acceptFilter(m: Message): Option[Message] = Some(m)
+
+      val message = createMessage("blah")
+      actor ! message
+
+      eventuallyExpectMsg[Processed] {
+        case Processed(m) => m == message
+      }
+    }
+
+
+    "let the message pass through two filters" in new Context {
+      val actor = TestActorRef {
+        new SubscriberActor(new Subscriber(queue), acceptFilter, acceptFilter) {
+          def receive: Receive = {
+            case m: Message =>
+              sender() ! Processed(m)
+          }
+        }
+      }
+
+      def acceptFilter(m: Message): Option[Message] = Some(m)
+
+      val message = createMessage("blah")
+      actor ! message
+
+      eventuallyExpectMsg[Processed] {
+        case Processed(m) => m == message
+      }
+    }
+
   }
 
   "Subscriber actor with only messages" should {

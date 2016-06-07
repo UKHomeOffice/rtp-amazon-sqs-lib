@@ -1,7 +1,8 @@
 package uk.gov.homeoffice.amazon.sqs.subscription
 
-import java.util.concurrent.TimeUnit
-
+import scala.concurrent.duration._
+import scala.concurrent.{Future, Promise}
+import scala.util.Try
 import akka.actor.Props
 import akka.testkit.TestActorRef
 import org.json4s.JValue
@@ -13,10 +14,6 @@ import uk.gov.homeoffice.amazon.sqs._
 import uk.gov.homeoffice.amazon.sqs.subscription.protocol.Processed
 import uk.gov.homeoffice.concurrent.PromiseOps
 import uk.gov.homeoffice.json.JsonFormats
-
-import scala.concurrent.duration._
-import scala.concurrent.{Future, Promise}
-import scala.util.Try
 
 class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats with PromiseOps {
   trait Context extends ActorSystemContext with ActorExpectations with EmbeddedSQSServer {
@@ -61,6 +58,8 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
     }
 
     "reject a message as it didn't pass through the filter" in new Context {
+      def rejectFilter(m: Message): Option[Message] = None
+
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue), rejectFilter) {
           def receive: Receive = {
@@ -69,8 +68,6 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
         }
       }
 
-      def rejectFilter(m: Message): Option[Message] = None
-
       actor ! createMessage("blah")
 
       expectMsgType[Message]
@@ -78,6 +75,8 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
     }
 
     "let the message pass through the filter" in new Context {
+      def acceptFilter(m: Message): Option[Message] = Some(m)
+
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue), acceptFilter) {
           def receive: Receive = {
@@ -87,8 +86,6 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
         }
       }
 
-      def acceptFilter(m: Message): Option[Message] = Some(m)
-
       val message = createMessage("blah")
       actor ! message
 
@@ -97,8 +94,9 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
       }
     }
 
-
     "let the message pass through two filters" in new Context {
+      def acceptFilter(m: Message): Option[Message] = Some(m)
+
       val actor = TestActorRef {
         new SubscriberActor(new Subscriber(queue), acceptFilter, acceptFilter) {
           def receive: Receive = {
@@ -108,8 +106,6 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
         }
       }
 
-      def acceptFilter(m: Message): Option[Message] = Some(m)
-
       val message = createMessage("blah")
       actor ! message
 
@@ -117,7 +113,6 @@ class SubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with 
         case Processed(m) => m == message
       }
     }
-
   }
 
   "Subscriber actor with only messages" should {

@@ -14,14 +14,16 @@ import uk.gov.homeoffice.json.Json
   * Process a message by implementing "receive".
   * Your receive function should at least handle Message. However, it should also handle your own custom protocol of messages.
   * After a Message has been processed, you should probably delete the message from the queue and if necessary handle any errors such as publishing an error message.
+  * README.md describes this given functionality in a diagram.
   * @param subscriber Subscriber Amazon SQS subscriber which wraps connection functionality to an instance of SQS.
   * @param filters Zero to many functions of Message => Option[Message] where a filter can act on and/or alter a given message and either pass it through for further processing or not.
   * @param listeners  Seq[ActorRef] Registered listeners will be informed of all messages received by this actor.
-  * <img src="/doc-files/classhierarchy.png">
   */
 abstract class SubscriberActor(subscriber: Subscriber, filters: (Message => Option[Message])*)(implicit listeners: Seq[ActorRef] = Seq.empty[ActorRef]) extends Actor with QueueCreation with Json with ActorLogging {
   implicit val sqsClient = subscriber.sqsClient
+
   val queue = subscriber.queue
+
   val publisher = new Publisher(queue)
 
   /** Upon instantiating this actor, create its associated queues and start subscribing. */

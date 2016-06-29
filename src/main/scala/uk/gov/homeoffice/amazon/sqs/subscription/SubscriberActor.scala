@@ -28,6 +28,15 @@ import uk.gov.homeoffice.json.Json
   *   - A filter may replace a message with something completely different before passing it on.
   *   Also note, that no filters have to be provided, and normal processing occurs.
   *   And on that note, indeed, no message listeners need to be provided, if you are not interested in what messages are being consumed.
+  *
+  *   Here is an example of defining a filter which takes a message and spits out a decrypted version i.e. the consumed message would have been encrypted:
+  *
+  *   class CryptoFilter(implicit secrets: Secrets) extends (Message => Option[Message]) with Crypto {
+  *     def apply(msg: Message): Option[Message] = decrypt(parse(msg.content)) match {
+  *       case Success(a) => Some(constructMessage(a))
+  *       case _ => None
+  *     }
+  *   }
   * </pre>
   */
 abstract class SubscriberActor(subscriber: Subscriber, filters: (Message => Option[Message])*)(implicit listeners: Seq[ActorRef] = Seq.empty[ActorRef]) extends Actor with QueueCreation with Json with ActorLogging {

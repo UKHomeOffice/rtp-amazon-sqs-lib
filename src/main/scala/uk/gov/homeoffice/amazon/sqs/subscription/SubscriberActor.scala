@@ -18,6 +18,17 @@ import uk.gov.homeoffice.json.Json
   * @param subscriber Subscriber Amazon SQS subscriber which wraps connection functionality to an instance of SQS.
   * @param filters Zero to many functions of Message => Option[Message] where a filter can act on and/or alter a given message and either pass it through for further processing or not.
   * @param listeners  Seq[ActorRef] Registered listeners will be informed of all messages received by this actor.
+  *
+  * Note on the argument "filters". A subscribed message can be filtered.
+  * Filtering can be used in various ways.
+  * <pre>
+  *   A message consumed by this actor is first given to filters (that are chained) before potentially being processed by the concrete implementation of this actor's "receive" method.
+  *   - A filter may decide not to "pass through" a message and so will not go through the rest of the filter and chain, and won't be given to the processing code in "receive".
+  *   - A filter may alter a message before passing it onto the next filter or the "receive" method.
+  *   - A filter may replace a message with something completely different before passing it on.
+  *   Also note, that no filters have to be provided, and normal processing occurs.
+  *   And on that note, indeed, no message listeners need to be provided, if you are not interested in what messages are being consumed.
+  * </pre>
   */
 abstract class SubscriberActor(subscriber: Subscriber, filters: (Message => Option[Message])*)(implicit listeners: Seq[ActorRef] = Seq.empty[ActorRef]) extends Actor with QueueCreation with Json with ActorLogging {
   implicit val sqsClient = subscriber.sqsClient

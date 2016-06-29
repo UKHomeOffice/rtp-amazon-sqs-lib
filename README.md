@@ -80,8 +80,10 @@ Note that the log configuration file could also be included e.g.
 
 So a more indepth startup with sbt itself could be:
 ```bash
-sbt run -Dconfig.file=target/scala-2.11/test-classes/application.test.conf -Dlogback.configurationFile=target/scala-2.11/test-classes/logback.test.xml
+sbt test:run -Dconfig.file=target/scala-2.11/test-classes/application.test.conf -Dlogback.configurationFile=target/scala-2.11/test-classes/logback.test.xml
 ```
+
+Note the use of test:run. Usually we would only use "run", but as this is a library, there is no default "main" class, but we do have an example test "main" class.
 
 And another example:
 

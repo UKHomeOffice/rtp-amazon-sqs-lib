@@ -1,13 +1,10 @@
 package uk.gov.homeoffice.amazon.sqs.subscription
 
 import java.security.MessageDigest
-
+import scala.util.Success
 import org.json4s.jackson.JsonMethods._
 import uk.gov.homeoffice.amazon.sqs.Message
 import uk.gov.homeoffice.crypt.{Crypto, Secrets}
-
-import scala.util.Success
-
 
 class CryptoFilter(implicit secrets: Secrets) extends (Message => Option[Message]) with Crypto {
   def apply(msg: Message): Option[Message] = decrypt(parse(msg.content)) match {

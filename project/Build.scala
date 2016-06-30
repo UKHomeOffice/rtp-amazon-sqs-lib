@@ -45,7 +45,7 @@ object Build extends Build {
       val `gatling-version` = "2.1.7"
       val `rtp-test-lib-version` = "1.3.1"
       val `rtp-akka-lib-version` = "1.7.3"
-      val `rtp-io-lib-version` = "1.7.18"
+      val `rtp-io-lib-version` = "1.7.17"
 
       Seq(
         "org.elasticmq" %% "elasticmq-core" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray") withSources(),

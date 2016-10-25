@@ -13,12 +13,12 @@ import org.json4s.jackson.JsonMethods._
 import org.scalactic.{Good, Or}
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
-import uk.gov.homeoffice.akka.ActorSystemContext
+import uk.gov.homeoffice.akka.ActorSystemSpecification
 import uk.gov.homeoffice.amazon.sqs._
 import uk.gov.homeoffice.concurrent.PromiseOps
 import uk.gov.homeoffice.json._
 
-class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with JsonFormats with PromiseOps {
+class JsonSubscriberActorSpec(implicit ev: ExecutionEnv) extends Specification with ActorSystemSpecification with JsonFormats with PromiseOps {
   trait Context extends ActorSystemContext with EmbeddedSQSServer {
     val queue = create(new Queue("test-queue"))
 

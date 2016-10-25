@@ -6,10 +6,10 @@ import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
-import uk.gov.homeoffice.akka.ActorSystemContext
+import uk.gov.homeoffice.akka.ActorSystemSpecification
 import uk.gov.homeoffice.amazon.sqs.subscription.Subscriber
 
-class PublisherRESTSpec(implicit ev: ExecutionEnv) extends Specification {
+class PublisherRESTSpec(implicit ev: ExecutionEnv) extends Specification with ActorSystemSpecification {
   "Restful client" should {
     "post some text" in new ActorSystemContext with EmbeddedSQSServer with REST {
       val queue = create(new Queue("test-queue"))

@@ -8,7 +8,6 @@ pipeline:
     image: quay.io/ukhomeofficedigital/scala-sbt:v0.3.1
     environment:
       - ARTIFACTORY_USERNAME=regt-build-bot
-      - MONGO_HOST=database
     secrets:
       - ARTIFACTORY_PASSWORD
     when:
@@ -41,6 +40,3 @@ pipeline:
     when:
       event: tag
 
-services:
-  database:
-      image: mongo

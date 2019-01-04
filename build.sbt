@@ -42,9 +42,9 @@ val root = Project(id = moduleName, base = file("."))
     val `play-version` = "2.5.0"
     val `elasticmq-version` = "0.10.0"
     val `gatling-version` = "2.1.7"
-    val `rtp-test-lib-version` = "1.3.4"
-    val `rtp-akka-lib-version` = "2.0.0"
-    val `rtp-io-lib-version` = "1.7.23"
+    val `rtp-test-lib-version` = "1.6.6-g6f56307"
+    val `rtp-akka-lib-version` = "2.3.2-g81ddcbc"
+    val `rtp-io-lib-version` = "2.2.0"
 
     Seq(
       "org.elasticmq" %% "elasticmq-core" % `elasticmq-version` excludeAll ExclusionRule(organization = "io.spray") withSources(),

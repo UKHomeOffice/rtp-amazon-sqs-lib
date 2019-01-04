@@ -69,13 +69,10 @@ val root = Project(id = moduleName, base = file("."))
       "uk.gov.homeoffice" %% "rtp-akka-lib" % `rtp-akka-lib-version` % Test classifier "tests" withSources()
     )
   })
+
 publishTo := {
   val artifactory = sys.env.get("ARTIFACTORY_SERVER").getOrElse("http://artifactory.registered-traveller.homeoffice.gov.uk/")
-
-  if (isSnapshot.value)
-    Some("snapshot" at artifactory + "artifactory/libs-snapshot-local")
-  else
-    Some("release"  at artifactory + "artifactory/libs-release-local")
+  Some("release"  at artifactory + "artifactory/libs-release-local")
 }
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
@@ -124,3 +121,16 @@ assemblyMergeStrategy in assembly := {
 test in assembly := {}
 
 fork in run := true
+
+git.useGitDescribe := true
+git.gitDescribePatterns := Seq("v?.?")
+git.gitTagToVersionNumber := { tag :String =>
+
+val branchTag = if (git.gitCurrentBranch.value == "master") "" else "-" + git.gitCurrentBranch.value
+val uncommit = if (git.gitUncommittedChanges.value) "-U" else ""
+
+tag match {
+  case v if v.matches("v\\d+.\\d+") => Some(s"$v.0${uncommit}".drop(1))
+  case v if v.matches("v\\d+.\\d+-.*") => Some(s"${v.replaceFirst("-",".")}${branchTag}${uncommit}".drop(1))
+  case _ => None
+}}
